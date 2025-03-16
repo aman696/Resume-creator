@@ -1,0 +1,244 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark theme colors - Updated with new color scheme */
+  --dark-bg: #121212;
+  --dark-card-bg: #1E1E1E;
+  --dark-section-bg: #252525;
+  
+  /* Primary colors with variants - Updated */
+  --primary: #A3C9D0;         /* New primary color */
+  --primary-light: #BFD9DE;   /* Lighter version */
+  --primary-dark: #7EA9B0;    /* Darker version */
+  --primary-glow: rgba(163, 201, 208, 0.15);
+  
+  /* Secondary colors - New */
+  --secondary: #F4E0A6;       /* New secondary color */
+  --secondary-light: #F8EBCA;
+  --secondary-dark: #DCC27A;
+  --secondary-glow: rgba(244, 224, 166, 0.15);
+  
+  /* Text colors */
+  --dark-text-primary: #FFFFFF;
+  --dark-text-secondary: #CCCCCC;
+  --dark-text-muted: #999999;
+  
+  /* Common colors */
+  --error: #E74C3C;
+  --success: #2ECC71;
+  --warning: #F39C12;
+  
+  /* Layout sizes */
+  --header-height: 70px;
+  --footer-height: 60px;
+  --border-radius: 8px;
+  
+  /* Additional colors - Updated to use new color vars */
+  --nav-link-hover: var(--primary-light);
+  --nav-link-active-border: var(--primary);
+  --hero-bg-gradient: linear-gradient(to right, rgba(126, 169, 176, 0.1), rgba(163, 201, 208, 0.1), rgba(126, 169, 176, 0.1));
+  --option-card-hover-transform: translateY(-5px);
+  --option-card-hover-shadow: 0 10px 20px var(--primary-glow);
+  --primary-button-bg: var(--primary);
+  --primary-button-hover-bg: var(--primary-light);
+  --primary-button-hover-shadow: 0 0 15px var(--primary);
+  --secondary-button-border: var(--secondary);
+  --secondary-button-hover-bg: var(--secondary);
+  --secondary-button-hover-shadow: 0 0 10px var(--secondary-glow);
+  --features-section-border: var(--primary-dark);
+  --feature-card-border-left: var(--primary);
+  --feature-card-hover-shadow: 0 0 15px 5px var(--primary-glow);
+  --templates-section-border: var(--primary-dark);
+  --template-preview-card-border: var(--primary-dark);
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: var(--dark-bg);
+    color: var(--dark-text-primary);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  main {
+    margin-top: var(--header-height);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary-dark);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+}
+
+@layer components {
+  .primary-button {
+    background-color: var(--primary-button-bg);
+    color: var(--dark-bg);
+    box-shadow: 0 0 10px var(--primary-glow);
+    transition: all 0.3s ease;
+  }
+  
+  .primary-button:hover {
+    background-color: var(--primary-button-hover-bg);
+    box-shadow: var(--primary-button-hover-shadow);
+    transform: translateY(-2px);
+  }
+
+  .secondary-button {
+    background-color: transparent;
+    color: var(--secondary);
+    border: 1px solid var(--secondary-button-border);
+    transition: all 0.3s ease;
+  }
+  
+  .secondary-button:hover {
+    background-color: var(--secondary-button-hover-bg);
+    color: var(--dark-bg);
+    box-shadow: var(--secondary-button-hover-shadow);
+    transform: translateY(-2px);
+  }
+
+  .feature-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    transition: all 0.3s ease;
+    box-shadow: var(--feature-card-hover-shadow);
+  }
+  
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+}
