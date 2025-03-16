@@ -1,28 +1,21 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Menu, X } from "lucide-react";
-
+import { Menu, X } from "lucide-react";
+import Logo from "/logo.png";
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const toggleMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    // In a real app, this would toggle the theme
   };
 
   return (
     <header className="fixed w-full top-0 z-50 bg-[var(--dark-bg)] border-b border-[var(--primary-dark)]">
       <div className="container mx-auto px-4 md:px-8 h-[var(--header-height)] flex justify-between items-center">
         <div className="flex items-center">
-          <a href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-[var(--primary)]">Resgen</span>
-          </a>
+        <a href="/" className="flex-shrink-0">
+        <img src={Logo} alt="Logo" className="w-[200px] h-auto" />
+      </a>
         </div>
 
         {/* Desktop Navigation */}
@@ -63,31 +56,16 @@ const Header = () => {
           </ul>
 
           <div className="flex items-center pl-4 space-x-3">
-            <Button variant="outline" size="sm" className="border-[var(--primary-dark)] text-[var(--dark-text-secondary)]">
-              Sign In
-            </Button>
-            <Button size="sm" className="primary-button">
-              Sign Up
-            </Button>
-            <button
-              onClick={toggleTheme}
-              className="ml-2 p-2 rounded-full bg-[var(--dark-card-bg)] text-[var(--primary)] hover:bg-[var(--dark-section-bg)] transition-colors"
-              aria-label="Toggle theme"
+          <button
+              className="px-4 py-2 rounded border border-[var(--secondary)] text-[var(--secondary)] bg-transparent transition-all hover:bg-[var(--secondary)] hover:text-[var(--dark-bg)] hover:shadow-[0_0_10px_var(--secondary-glow)]"
             >
-              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              Signin/Login
             </button>
           </div>
         </nav>
 
         {/* Mobile Menu Button */}
         <div className="flex items-center md:hidden">
-          <button
-            onClick={toggleTheme}
-            className="p-2 mr-2 rounded-full bg-[var(--dark-card-bg)] text-[var(--primary)]"
-            aria-label="Toggle theme"
-          >
-            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
           <button
             onClick={toggleMenu}
             className="p-2 rounded-full bg-[var(--dark-card-bg)] text-[var(--primary)]"
@@ -158,3 +136,4 @@ const Header = () => {
 };
 
 export default Header;
+

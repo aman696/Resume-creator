@@ -116,16 +116,13 @@ export default function Home() {
                 </span>
                 <span className="absolute inset-0 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] opacity-0 group-hover:opacity-100 transition-opacity"></span>
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="secondary-button px-8 py-6 text-lg w-full sm:w-auto border-[var(--secondary)] text-[var(--secondary)] hover:text-[var(--dark-bg)] group"
-              >
-                <span className="flex items-center">
-                  View Examples 
-                  <ChevronRight className="ml-1 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </span>
-              </Button>
+
+        <button
+              className="px-4 py-2 rounded border border-[var(--secondary)] text-[var(--secondary)] bg-transparent transition-all hover:bg-[var(--secondary)] hover:text-[var(--dark-bg)] hover:shadow-[0_0_10px_var(--secondary-glow)]"
+            >
+              View Examples 
+            </button>
+              
             </div>
             <p className="text-sm text-[var(--dark-text-muted)]">
               Want advanced AI features? Use your own Mistral API key.{' '}
@@ -175,26 +172,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="relative z-10 container mx-auto px-4 -mt-12 md:-mt-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="max-w-4xl mx-auto py-6 px-8 bg-[var(--dark-card-bg)] rounded-2xl shadow-xl border border-[var(--primary-dark)]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              {statsData.map((stat, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div className="text-3xl md:text-4xl font-bold text-[var(--primary)]">{stat.value}</div>
-                  <div className="text-sm text-[var(--dark-text-muted)]">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      </section>
+
 
       {/* Features Section */}
       <section id="features" className="py-20 md:py-28">
@@ -431,79 +409,6 @@ export default function Home() {
               <ChevronRight className="ml-1 h-5 w-5" />
             </Button>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 md:py-28 relative">
-        <div className="absolute inset-0 bg-[var(--dark-section-bg)]"></div>
-        <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-6xl">
-          <motion.div 
-            className="mb-16 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
-              <span className="bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] bg-clip-text text-transparent">
-                Success Stories
-              </span>
-            </h2>
-            <p className="text-[var(--dark-text-secondary)] max-w-2xl mx-auto leading-relaxed text-lg">
-              See how Resgen has helped job seekers land their dream positions.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Card
-                  className="p-8 rounded-[var(--border-radius)] bg-[var(--dark-card-bg)] border border-[var(--primary-dark)] hover:shadow-[var(--feature-card-hover-shadow)] transition-all duration-300 hover:-translate-y-1"
-                >
-                  <CardContent className="p-0">
-                    <div className="flex flex-col gap-6">
-                      <div className="flex items-start gap-4">
-                        <div className="h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-[var(--primary)]">
-                          <img 
-                            src={testimonial.image} 
-                            alt={testimonial.name}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-xl text-[var(--dark-text-primary)]">
-                            {testimonial.name}
-                          </h4>
-                          <p className="text-sm text-[var(--dark-text-muted)]">
-                            {testimonial.role} at {testimonial.company}
-                          </p>
-                          <div className="flex mt-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i}
-                                className={`h-4 w-4 ${i < testimonial.stars ? 'text-[var(--secondary)]' : 'text-[var(--dark-text-muted)]'}`}
-                                fill={i < testimonial.stars ? 'var(--secondary)' : 'none'}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-[var(--dark-text-muted)] leading-relaxed italic">
-                        "{testimonial.quote}"
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
