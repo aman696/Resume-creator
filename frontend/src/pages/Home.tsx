@@ -1,17 +1,33 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowRight, CheckCircle, Download, FileText, Sparkles, MousePointer, Star, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { 
+  ArrowRight, CheckCircle, Download, FileText, Sparkles, MousePointer, 
+  Star, ChevronRight, ArrowUpRight, X 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import template1 from '../assets/template1.pdf';
 
 export default function Home() {
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [hoveredTemplate, setHoveredTemplate] = useState<number | null>(null);
   const [scrollY, setScrollY] = useState(0);
-
+  useEffect(() => {
+    // Prevent body scrolling when modal is open
+    if (previewOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [previewOpen]);
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
@@ -40,34 +56,9 @@ export default function Home() {
   ];
 
   const templates = [
-    { id: 1, name: "Professional", tag: "Most Popular" },
-    { id: 2, name: "Creative", tag: "Designer's Choice" },
-    { id: 3, name: "Minimalist", tag: "Clean & Simple" },
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Software Engineer",
-      company: "Tech Solutions Inc.",
-      quote: "Using Resgen's AI tools, I was able to tailor my resume for each application. I received interview requests from 80% of the companies I applied to and landed my dream job!",
-      stars: 5,
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=faces"
-    },
-    {
-      name: "Michael Chen",
-      role: "Product Manager",
-      company: "Innovate Labs",
-      quote: "Resgen's templates made my resume stand out. I got multiple interview calls within a week of applying!",
-      stars: 5,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=faces"
-    },
-  ];
-
-  const statsData = [
-    { value: "89%", label: "Interview Rate" },
-    { value: "3.2M+", label: "Resumes Created" },
-    { value: "4.9", label: "Average Rating" },
+    { id: 1, name: "Professional" },
+    { id: 2, name: "Creative" },
+    { id: 3, name: "Minimalist" },
   ];
 
   // Parallax effect for hero background
@@ -93,9 +84,13 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] bg-clip-text text-transparent">Build Your Resume</span> 
+              <span className="bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] bg-clip-text text-transparent">
+                Build Your Resume
+              </span> 
               <span className="relative inline-block ml-2">
-                <span className="bg-gradient-to-r from-[var(--secondary)] to-[var(--secondary-light)] bg-clip-text text-transparent">with AI</span>
+                <span className="bg-gradient-to-r from-[var(--secondary)] to-[var(--secondary-light)] bg-clip-text text-transparent">
+                  with AI
+                </span>
                 <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 100 10" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0,5 Q25,0 50,5 T100,5" fill="none" stroke="var(--primary-dark)" strokeWidth="2" />
                 </svg>
@@ -117,12 +112,11 @@ export default function Home() {
                 <span className="absolute inset-0 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] opacity-0 group-hover:opacity-100 transition-opacity"></span>
               </Button>
 
-        <button
-              className="px-4 py-2 rounded border border-[var(--secondary)] text-[var(--secondary)] bg-transparent transition-all hover:bg-[var(--secondary)] hover:text-[var(--dark-bg)] hover:shadow-[0_0_10px_var(--secondary-glow)]"
-            >
-              View Examples 
-            </button>
-              
+              <button
+                className="px-4 py-2 rounded border border-[var(--secondary)] text-[var(--secondary)] bg-transparent transition-all hover:bg-[var(--secondary)] hover:text-[var(--dark-bg)] hover:shadow-[0_0_10px_var(--secondary-glow)]"
+              >
+                View Examples 
+              </button>
             </div>
             <p className="text-sm text-[var(--dark-text-muted)]">
               Want advanced AI features? Use your own Mistral API key.{' '}
@@ -171,8 +165,6 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-
-
 
       {/* Features Section */}
       <section id="features" className="py-20 md:py-28">
@@ -271,9 +263,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <Button
-                    className="primary-button flex items-center px-6 py-3"
-                  >
+                  <Button className="primary-button flex items-center px-6 py-3">
                     Try The Demo
                     <MousePointer className="ml-2 h-4 w-4" />
                   </Button>
@@ -322,6 +312,7 @@ export default function Home() {
       {/* Templates Section */}
       <section id="templates" className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-8 max-w-6xl">
+          {/* Section Heading */}
           <motion.div 
             className="mb-16 text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -335,11 +326,11 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-[var(--dark-text-secondary)] max-w-2xl mx-auto leading-relaxed text-lg">
-              Get a head start with our pre-built layouts—optimized for
-              recruiters and Applicant Tracking Systems.
+              Get a head start with our pre-built layouts—optimized for recruiters and Applicant Tracking Systems.
             </p>
           </motion.div>
 
+          {/* Templates Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {templates.map((template, index) => (
               <motion.div
@@ -354,15 +345,11 @@ export default function Home() {
                   onMouseEnter={() => setHoveredTemplate(index)}
                   onMouseLeave={() => setHoveredTemplate(null)}
                 >
-                  {template.tag && (
-                    <div className="absolute top-4 right-4 z-20 bg-[var(--secondary)] text-[var(--dark-bg)] text-xs font-bold px-3 py-1 rounded-full">
-                      {template.tag}
-                    </div>
-                  )}
+                  {/* Overlay on hover */}
                   <div
                     className={cn(
-                      "absolute inset-0 flex items-center justify-center bg-gradient-to-t from-[var(--dark-card-bg)]/95 via-[var(--dark-card-bg)]/70 to-transparent opacity-0 transition-opacity duration-300",
-                      hoveredTemplate === index && "opacity-100"
+                      "absolute inset-0 bg-[var(--dark-card-bg)] bg-opacity-90 transition-opacity",
+                      hoveredTemplate === index ? "opacity-100" : "opacity-0"
                     )}
                   >
                     <div className="flex flex-col items-center gap-4 p-6 text-center">
@@ -379,22 +366,40 @@ export default function Home() {
                       <p className="text-[var(--dark-text-muted)] mb-4">
                         Professional and ATS-optimized layout
                       </p>
-                      <Button className="primary-button px-6 py-3">
-                        Use Template
-                      </Button>
+                      <div className="flex gap-4">
+                        <Button className="primary-button px-6 py-3">
+                          Use Template
+                        </Button>
+                        {/* Preview Template Button */}
+                        <Button 
+                          className="primary-button px-6 py-3 z-10"
+                          onClick={() => setPreviewOpen(true)}
+                        >
+                          Preview Template
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="absolute inset-0 bg-[var(--primary-glow)]/5"></div>
-                  <img
-                    src={`/placeholder.svg?height=600&width=450&text=Template+${template.id}`}
-                    alt={`Resume Template ${template.name}`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+
+                  {/* PDF Preview (always visible in the card) */}
+                  <iframe
+  src={`${template1}#toolbar=0&zoom=35&scrollbar=0&navpanes=0`}
+  className="w-full h-[400px] object-contain"
+  style={{
+    border: 'none',
+    overflow: 'hidden', // Hide overflow
+    pointerEvents: 'none' // Disable interaction inside iframe
+  }}
+  scrolling="no" // This explicitly disables scrolling in the iframe
+/>
+
+
                 </div>
               </motion.div>
             ))}
           </div>
 
+          {/* View All Button */}
           <motion.div 
             className="mt-12 text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -402,16 +407,90 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Button
-              className="secondary-button px-8 py-3 text-lg"
+            <button
+              className="px-4 py-2 rounded border border-[var(--secondary)] text-[var(--secondary)] bg-transparent transition-all hover:bg-[var(--secondary)] hover:text-[var(--dark-bg)] hover:shadow-[0_0_10px_var(--secondary-glow)]"
             >
               View All Templates
-              <ChevronRight className="ml-1 h-5 w-5" />
-            </Button>
+            </button>
           </motion.div>
         </div>
       </section>
 
+      {/* Modal for PDF Preview */}
+      {previewOpen && (
+  <div 
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm"
+    onClick={() => setPreviewOpen(false)} // Close when clicking outside
+  >
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+      className="relative w-11/12 max-w-5xl bg-gradient-to-b from-[var(--dark-card-bg)] to-[var(--dark-bg)] rounded-xl overflow-hidden shadow-2xl flex flex-col border border-[var(--primary-dark)]"
+      onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
+    >
+      {/* Header with glowing accent */}
+      <div className="flex items-center justify-between p-4 border-b border-[var(--primary-dark)] bg-[var(--dark-bg)]">
+        <div className="flex items-center">
+          <div className="w-1.5 h-6 bg-[var(--primary)] rounded-full mr-3 shadow-[0_0_10px_var(--primary-glow)]"></div>
+          <h3 className="text-xl font-semibold bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] bg-clip-text text-transparent">
+            Template Preview
+          </h3>
+        </div>
+        <button
+          onClick={() => setPreviewOpen(false)}
+          className="group bg-[var(--dark-bg)] hover:bg-[var(--primary)] text-[var(--primary)] hover:text-white rounded-full w-9 h-9 flex items-center justify-center transition-all duration-300 border border-[var(--primary-dark)] hover:border-transparent hover:shadow-[0_0_15px_var(--primary-glow)]"
+          aria-label="Close preview"
+        >
+          <X className="h-5 w-5 group-hover:scale-90 transition-transform" />
+        </button>
+      </div>
+      
+      {/* PDF Viewer with dark mode */}
+      <div className="flex-1 bg-[var(--dark-bg)] p-6 flex items-center justify-center">
+        <div className="relative w-full rounded-lg overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] max-h-[75vh]">
+          {/* PDF loading overlay/animation */}
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--dark-bg)] bg-opacity-70 pointer-events-none z-10" id="pdf-loading-overlay">
+            <div className="w-10 h-10 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          
+          <object
+            data={`${template1}#zoom=50&toolbar=0&scrollbar=0&navpanes=0`}
+            type="application/pdf"
+            className="w-full h-[75vh] overflow-hidden bg-[var(--dark-bg)]"
+            style={{ 
+              border: 'none',
+              filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))'
+            }}
+            onLoad={() => {
+              // TypeScript-safe way to hide loading overlay
+              const overlay = document.getElementById('pdf-loading-overlay');
+              if (overlay) overlay.style.display = 'none';
+            }}
+          >
+            <p className="text-[var(--dark-text-secondary)]">Your browser does not support PDF viewing.</p>
+          </object>
+        </div>
+      </div>
+      
+      {/* Footer with gradient buttons */}
+      <div className="p-4 border-t border-[var(--primary-dark)] flex justify-end space-x-4 bg-[var(--dark-bg)]">
+        <button
+          onClick={() => setPreviewOpen(false)}
+          className="px-5 py-2.5 rounded-lg bg-[var(--dark-card-bg)] hover:bg-[var(--dark-card-bg)] text-[var(--dark-text-secondary)] hover:text-white transition-colors border border-[var(--primary-dark)] hover:border-[var(--primary)]"
+        >
+          Close
+        </button>
+        <button
+              className="px-4 py-2 rounded border border-[var(--secondary)] text-[var(--secondary)] bg-transparent transition-all hover:bg-[var(--secondary)] hover:text-[var(--dark-bg)] hover:shadow-[0_0_10px_var(--secondary-glow)]"
+            >
+              Use this template
+            </button>
+      </div>
+    </motion.div>
+  </div>
+)}
       {/* CTA Section */}
       <section className="relative overflow-hidden py-20 md:py-28">
         <div className="absolute inset-0 bg-[var(--hero-bg-gradient)]"></div>

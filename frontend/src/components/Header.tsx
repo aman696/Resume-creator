@@ -37,22 +37,6 @@ const Header = () => {
                 Templates
               </a>
             </li>
-            <li>
-              <a
-                href="#"
-                className="px-4 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--primary)] transition-colors"
-              >
-                Pricing
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="px-4 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--primary)] transition-colors"
-              >
-                Blog
-              </a>
-            </li>
           </ul>
 
           <div className="flex items-center pl-4 space-x-3">
@@ -100,31 +84,10 @@ const Header = () => {
                     Templates
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="#"
-                    className="block py-2 text-[var(--dark-text-secondary)] hover:text-[var(--primary)]"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="block py-2 text-[var(--dark-text-secondary)] hover:text-[var(--primary)]"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Blog
-                  </a>
-                </li>
                 <div className="pt-4 flex flex-col space-y-3">
-                  <Button variant="outline" className="border-[var(--primary-dark)] text-[var(--dark-text-secondary)]">
-                    Sign In
-                  </Button>
-                  <Button className="primary-button">
-                    Sign Up
-                  </Button>
+                  <button className="px-4 py-2 rounded border border-[var(--secondary)] text-[var(--secondary)] bg-transparent transition-all hover:bg-[var(--secondary)] hover:text-[var(--dark-bg)] hover:shadow-[0_0_10px_var(--secondary-glow)]">
+                    Signin/Login
+                  </button>
                 </div>
               </ul>
             </nav>
