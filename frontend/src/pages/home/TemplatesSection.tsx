@@ -19,11 +19,16 @@ export default function TemplatesSection() {
     } else {
       document.body.style.overflow = '';
     }
-
     return () => {
       document.body.style.overflow = '';
     };
   }, [previewOpen]);
+
+  // Helper function to extract the template number from the file name
+  const getTemplateId = (file: string): string | null => {
+    const match = file.match(/\d+/);
+    return match ? match[0] : null;
+  };
 
   return (
     <section id="templates" className="py-20 md:py-28">
@@ -69,11 +74,7 @@ export default function TemplatesSection() {
                   <div className="flex flex-col items-center gap-4 p-6 text-center">
                     <motion.div
                       className="rounded-full bg-[var(--primary-glow)] p-3"
-                      animate={
-                        hoveredTemplate === index
-                          ? { scale: [0.8, 1.2, 1] }
-                          : {}
-                      }
+                      animate={hoveredTemplate === index ? { scale: [0.8, 1.2, 1] } : {}}
                       transition={{ duration: 0.5 }}
                     >
                       <CheckCircle className="h-8 w-8 text-[var(--primary)]" />
@@ -85,15 +86,32 @@ export default function TemplatesSection() {
                       Professional and ATS-optimized layout
                     </p>
                     <div className="flex gap-4">
-                      <Button
-                        className="primary-button px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto"
-                        onClick={() => {
-                          // Navigate to TemplateEditing page with the template file
-                          navigate('/edit-template', { state: { templateFile: template.file } });
-                        }}
-                      >
-                        Use Template
-                      </Button>
+                    <Button
+  className="primary-button px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto"
+  onClick={async () => {
+    // Extract the template ID from the file name (e.g., "template1.pdf" -> "1")
+    const templateId = getTemplateId(template.file as string);
+    if (templateId) {
+      try {
+        // Use the full URL to hit the FastAPI endpoint
+        const res = await fetch(`http://localhost:8000/templates/${templateId}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch template LaTeX code");
+        }
+        const data = await res.json();
+        // Navigate to the editing page, passing both the PDF file and the LaTeX code
+        navigate('/edit-template', { state: { templateFile: template.file, latex: data.content } });
+      } catch (error) {
+        console.error("Error fetching LaTeX code: ", error);
+      }
+    } else {
+      console.error("Template ID not found in the file name");
+    }
+  }}
+>
+  Use Template
+</Button>
+
                       <Button
                         className="primary-button px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto z-10"
                         onClick={() => {
