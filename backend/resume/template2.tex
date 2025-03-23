@@ -1,99 +1,104 @@
-\documentclass[11pt,letterpaper]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage[margin=0.5in]{geometry}
-\usepackage{titlesec}
-\usepackage{enumitem}
-\usepackage{hyperref}
-\usepackage{xcolor}
-
-% Custom section command
-\titleformat{\section}
-  {\large\bfseries\uppercase}
-  {}{0em}{}[\titlerule]
-\titlespacing*{\section}{0pt}{*1.5}{*0.5}
-
-% Remove page numbers
-\pagenumbering{gobble}
-
-% Custom commands
-\newcommand{\name}[1]{
-  \begin{center}
-    \Huge\textbf{#1}
-  \end{center}
-  \vspace{-0.5em}
-  \hrule height 0.4pt width \textwidth
-  \vspace{0.5em}
-}
-\newcommand{\contact}[3]{
-  \begin{center}
-    #1 \\
-    #2 \\
-    #3
-  \end{center}
-  \vspace{-0.5em}
-  \hrule height 0.4pt width \textwidth
-  \vspace{0.5em}
-}
-\newcommand{\role}[4]{
-  \begin{center}
-  \textbf{#1} \hfill \textbf{#2} \\
-  \textit{#3} \hfill \textit{#4}
-  \end{center}
-}
+\documentclass{muratcan_cv}
+% BEGIN_header
+\setname{John Doe}{}
+\setaddress{Rando, Canada}
+\setmobile{+1 333-333-3333}
+\setmail{john@johndoe.com}
+% \setcitizenship{Eldian Citizen}
+\setlinkedinaccount{https://www.linkedin.com/in/rick-astley-b6a42b24/} 
+\setgithubaccount{https://github.com/topics/rick-astley} 
+\setthemecolor{MidnightBlue}
 
 \begin{document}
 
-\name{Richard Williams}
-\vspace{-0.5em}
-\contact{3665 Margaret Street, Houston, TX 47587}{(770) 625-9669}{RichardWilliams@gmail.com}
+\headerview
+\vspace{1ex} % white space
+% END_header
 
-\vspace{-0.5em}
-\begin{center}
-\textit{Financial Advisor with 7+ years of experience delivering financial/investment advisory services to high value clients. Proven success in managing multi-million dollar portfolios, driving profitability, and increasing ROI through skillful strategic planning, consulting, and financial advisory services.}
-\end{center}
+% BEGIN_education
+\section{Education} 
+    \datedexperience{Master of Engineering (Thesis) - Mechanical}{Sep 2018 - Apr 2021}
+    \explanation{Rando University}{San Francisco, CA} 
+    \datedexperience{Bachelor of Engineering - Mechanical}{Sep 2013 - Apr 2018}
+    \explanation{Rando University}{San Francisco, CA}
+% END_education
 
-\section{PROFESSIONAL EXPERIENCE}
+% BEGIN_skills
+\section{Skills}
+    \newcommand{\skillone}{\createskill{Programming Languages}{Python \cpshalf Java \cpshalf C++ \cpshalf C \cpshalf C\# \cpshalf JavaScript \cpshalf MATLAB \cpshalf Simulink}}
+    \newcommand{\skilltwo}{\createskill{Technologies}{AWS BS/EC/EC2/ELB \cpshalf Azure AD \cpshalf Docker \cpshalf React.js \cpshalf Flask \cpshalf Redis \cpshalf Spring \cpshalf Android \cpshalf ROS}}
+    \createskills{\skillone, \skilltwo}
+    \vspace{-3mm} % reduces whitespace!
+% END_skills
 
-\vspace{1em}
-\role{WELLS FARGO ADVISORS}{Houston, TX}{Senior Financial Advisor}{August 2020--Present}
-\begin{itemize}[leftmargin=*,nosep]
-  \item Deliver financial advice to clients, proposing strategies to achieve short- and long-term objectives for investments, insurance, business and estate planning with minimal risk
-  \item Develop, review, and optimize investment portfolios for 300+ high value clients with over \$190M AUM (Assets Under Management)
-  \item Ensure maximum client satisfaction by providing exceptional and personalized service, enhancing client satisfaction ratings from 88\% to 99.9\% in less than 6 months
-  \item Work closely with specialists from multiple branches, managing investment portfolios for over 800 clients with over \$25M in assets under care
-\end{itemize}
+% BEGIN_experience
+\section{Experience}
+    % BEGIN_experience-item-1
+    \datedexperience{Rando University}{May 2018 - Mar 2021}
+    \explanation{Graduate Control Systems Researcher}{San Francisco, CA}
+    \explanationdetail{
+    \smallskip
+     \coloredbullet\ %
+     Developed a novel modification to a quaternion-based control system that optimizes control allocation within a quadrotor's actuator constraints to improve its stability and performance.
+    \smallskip 
+    \coloredbullet\ %
+     Modeled and simulated a quadrotor's attitude and translational dynamics in MATLAB/Simulink to quantify the stability and performance improvements of the proposed control system.
+     \smallskip
+     \coloredbullet\ %
+     Adapted and extended existing C++ code architectures to facilitate prototype implementation and performed hardware-in-the-loop simulations, using Gazebo/ROS for testing.
+     \smallskip
+     }
+     % END_experience-item-1
 
-\role{SUNTRUST INVESTMENT SERVICES, INC.}{New Orleans, LA}{Financial Advisor}{July 2017--August 2020}
-\begin{itemize}[leftmargin=*,nosep,topsep=0pt]
-  \item Served as knowledgeable financial advisor to clients, managing an over \$20.75M investment portfolio of 90+ individual and corporate clients
-  \item Devised and applied a new training and accountability program that increased productivity from \#10 to \#3 in the region in less than 2 year period
-  \item Partnered with cross-functional teams in consulting with clients to provide asset management risk strategy and mitigation, which increased AUM by 50\%
-\end{itemize}
+     % BEGIN_experience-item-2
+     \datedexperience{Rando Space Company}{Sep 2017 - Dec 2017} 
+    \explanation{Satellite Simulations Intern}{San Francisco, CA} 
+    \explanationdetail{ 
+    \smallskip 
+    \coloredbullet\ %
+     Extended foundational Python code that performs Monte Carlo simulations for the Very Specific Space Mission.
+     \smallskip
+     \coloredbullet\ %
+     Coordinated with Senior Engineers in validating and improving models while supplying time-sensitive simulation data for Critical Design Reviews. 
+     \smallskip
+     \coloredbullet\ %
+     Generated reports for the Very Specific Space Mission performance under varied initial conditions of the Specific system to ensure its reliability before launch. 
+    \bigskip
+     } 
+     % END_experience-item-2
+% END_experience
 
-\role{MAVERICK CAPITAL MANAGEMENT}{New Orleans, LA}{Financial Advisor}{July 2014--August 2017}
-\begin{itemize}[leftmargin=*,nosep,topsep=0pt]
-  \item Served as the primary point of contact for over 15 clients
-  \item Managed the portfolios of several major clients with over \$8.5M in total assets
-\end{itemize}
+% BEGIN_projects
+\section{Notable Projects}
+     % BEGIN_project-item-1
+    \datedexperience{RandoSite.com}{Mar 2021 - Sep 2021}
+    \explanation{Full Stack Developer}{San Francisco, CA} 
+    \explanationdetail{
+    \smallskip 
+    \coloredbullet\ %
+     Independently built an open-source web application that performs advanced Monte Carlo calculations for options trading, receiving praise from the trading community for its simplicity and accessibility.
+     \smallskip
+     \coloredbullet\ %
+     Front and back-end development using the React and Flask (Python) frameworks, respectively. These services were containerized using Docker Compose to enable scalability in the software architecture.
+     \smallskip
+     \coloredbullet\ %
+     Used Python optimization techniques to reduce calculation times for a fast API that can serve thousands of users per second. Load balancing in AWS was incorporated to ensure fault-tolerance and reliability of the application.
+     \smallskip
+     \coloredbullet\ %
+     Integrated the Azure Active Directory B2C service for secure user authentication and convenient identity management.
+    \smallskip
+     }
+     % END_project-item-1
+% END_projects
 
-\vspace{1em}
-\section{EDUCATION}
-
-\vspace{0.5em}
-\role{LOUISIANA STATE UNIVERSITY}{Baton Rouge, LA}{Bachelor of Science in Business Administration}{May 2014}
-
-\vspace{1em}
-\section{SKILLS}
-
-\vspace{0.5em}
-\begin{itemize}[leftmargin=*,nosep]
-  \item Proficient in MS Office (Word, Excel, PowerPoint)
-  \item MS Project
-  \item Salesforce
-  \item TFS Project Management
-  \item Fluent in English, Spanish, and French
-\end{itemize}
+%BEGIN_publications
+\section{Publications}
+\indent
+\explanationdetail{
+\smallskip 
+\coloredbullet\ %
+ \textbf{John Doe} and FirstName LastName, "Super Awesome Modification for UAV Control Systems," \emph{2020 International Conference on Super Cool Stuff (ICSCS)}, Paris, France.
+ }
+%END_publications
 
 \end{document}

@@ -1,106 +1,144 @@
-\documentclass[11pt,letterpaper]{article}
-\usepackage[left=0.5in,right=0.5in,top=0.5in,bottom=0.5in]{geometry}
-\usepackage{multicol}
-\usepackage{enumitem}
+%-------------------------
+% Resume in Latex for Fresher
+% Author : Jake Gutierrez (Modified)
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
+% DOCUMENT PREAMBLE START
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
 \usepackage{titlesec}
-\usepackage{xcolor}
-\usepackage{tikz}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
 
-\definecolor{sectioncolor}{RGB}{84,129,53}
-\titleformat{\section}{\color{sectioncolor}\bfseries\uppercase}{}{0em}{}
-\titlespacing*{\section}{0pt}{0.5ex}{0.5ex}
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
 
-% Remove page numbers
-\pagenumbering{gobble}
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
 
-\setlength{\parindent}{0pt}
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure PDF is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]} 
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+% DOCUMENT PREAMBLE END
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
-\begin{flushleft}
-    \textbf{\LARGE\color{sectioncolor} RICHARD WILLIAMS} \\[0.5ex]
-    \color{black}\rule{\linewidth}{0.5pt} \\[0.5ex]
-    3665 Margaret Street, Houston, TX 47387 • RichardWilliams@gmail.com • (770) 625-9669
-\end{flushleft}
+% BEGIN_header
+\begin{center}
+    \textbf{\Huge \scshape Your Name} \\ \vspace{1pt}
+    \small 123-456-7890 $|$ \href{mailto:your.email@example.com}{\underline{your.email@example.com}} $|$ 
+    \href{https://linkedin.com/in/yourprofile}{\underline{linkedin.com/in/yourprofile}} $|$
+    \href{https://github.com/yourusername}{\underline{github.com/yourusername}}
+\end{center}
+% END_header
 
-\section*{SUMMARY}
-\vspace{0.5em}
-Financial Advisor with 7+ years of experience delivering financial/investment advisory services to high value clients. Proven success in managing multi-million-dollar portfolios, driving profitability, and increasing ROI through skilful strategic planning, consulting, and financial advisory services.
+% BEGIN_education
+\section{Education}
+  % First education item
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {University Name}{City, State}
+      {Bachelor of Science in Computer Science}{Expected Graduation: May 2025}
+      \resumeItemListStart
+        \resumeItem{GPA: 3.8/4.0}
+        \resumeItem{Dean's List: Fall 2022, Spring 2023}
+        \resumeItem{Relevant Coursework: Data Structures, Algorithms, Database Systems, Web Development}
+      \resumeItemListEnd
+    \resumeSubheading
+      {High School Name}{City, State}
+      {High School Diploma}{Graduated: May 2021}
+      \resumeItemListStart
+        \resumeItem{GPA: 3.9/4.0}
+        \resumeItem{Honors: Valedictorian, National Honor Society}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+% END_education
 
-\vspace{1em}
-\section*{PROFESSIONAL EXPERIENCE}
-\vspace{0.5em}
-\begin{minipage}[t]{0.75\textwidth}
-WELLS FARGO ADVISORS, Houston, TX \\
-Senior Financial Advisor
-\end{minipage}
-\hfill 
-\begin{minipage}[t]{0.2\textwidth}
-\hfill \textit{August 2020--Present} 
-\end{minipage}
+% BEGIN_projects
+\section{Projects}
+  \resumeSubHeadingListStart
+    \resumeProjectHeading
+        {\textbf{Personal Portfolio Website} $|$ \emph{HTML, CSS, JavaScript, Bootstrap}}{Jan 2023 -- Present}
+        \resumeItemListStart
+          \resumeItem{Designed and developed a responsive personal portfolio website}
+          \resumeItem{Implemented responsive design principles}
+          \resumeItem{Utilized Bootstrap framework}
+        \resumeItemListEnd
+  \resumeSubHeadingListEnd
+% END_projects
 
-\begin{multicols}{2}
-\begin{itemize}[leftmargin=1em,noitemsep,topsep=0pt]
-    \item Deliver financial advice to clients, proposing strategies to achieve short- and long-term objectives for investments, insurance, business and estate planning with minimal risk
-    \item Develop, review, and optimize investment portfolios for 400+ high value clients with over \$150M AUM (Assets Under Management)
-    \item Ensure maximum client satisfaction by providing exceptional and personalized service, enhancing client satisfaction ratings from 88\% to 97\% in less than 6 months
-    \item Work closely with specialists from multiple branches managing investment portfolios for over 800 clients with over \$25M in assets under care
-\end{itemize}
-\end{multicols}
+% BEGIN_skills
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, Java, HTML, CSS, JavaScript, SQL} \\
+     \textbf{Frameworks \& Libraries}{: React, Bootstrap, jQuery, Flask}
+    }}
+ \end{itemize}
+% END_skills 
 
-\vspace{1ex}
-
-\begin{minipage}[t]{0.6\textwidth}
-SUNTRUST INVESTMENT SERVICES, INC., New Orleans, LA \\
-Financial Advisor
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.4\textwidth}
-\hfill \textit{July 2017--August 2020}
-\end{minipage}
-
-\begin{multicols}{2}
-\begin{itemize}[leftmargin=1em,noitemsep,topsep=0pt]
-    \item Served as knowledgeable financial advisor to clients, managing an over \$20.75M investment portfolio of 90+ individual and corporate clients
-    \item Devised and applied a new training and accountability program that increased productivity from \#10 to \#3 in the region in less than 2-year period
-    \item Partnered with cross-functional teams in consulting with clients to provide asset management risk strategy and mitigation, which increased AUM by 50\%
-    \item Drummed up new business by cultivating solid relationships with clients, increasing the number of high-worth clients by 30\%
-\end{itemize}
-\end{multicols}
-
-\vspace{1ex}
-
-\begin{minipage}[t]{0.6\textwidth}
-MAVERICK CAPITAL MANAGEMENT, New Orleans, LA \\
-Financial Advisor
-\end{minipage}  
-\hfill
-\begin{minipage}[t]{0.4\textwidth}
-\hfill \textit{July 2014--August 2017}
-\end{minipage}
-
-\begin{multicols}{2}
-\begin{itemize}[leftmargin=1em,noitemsep,topsep=0pt]
-    \item Served as the primary point of contact for over 15 clients  
-    \item Managed the portfolios of several major clients with over \$8.5M in total assets
-\end{itemize}
-\end{multicols}
-
-\vspace{1em}
-\section*{EDUCATION}
-\vspace{0.5em}
-LOUISIANA STATE UNIVERSITY, Baton Rouge, LA \hfill \textit{May 2014} \\
-Bachelor of Science in Business Administration \\
-Honors: cum laude (GPA: 3.7/4.0)
-
-\vspace{1.5em}
-\section*{ADDITIONAL SKILLS}
-
-\begin{multicols}{2}
-\begin{itemize}[noitemsep,topsep=0pt]
-    \item Proficient in MS Office (Word, Excel, PowerPoint) Outlook, Salesforce, TFS Project Management
-    \item Fluent in English, Spanish, and French
-\end{itemize}  
-\end{multicols}
-
+%-------------------------------------------
 \end{document}

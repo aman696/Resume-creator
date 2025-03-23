@@ -100,7 +100,7 @@ export default function TemplatesSection() {
         }
         const data = await res.json();
         // Navigate to the editing page, passing both the PDF file and the LaTeX code
-        navigate('/edit-template', { state: { templateFile: template.file, latex: data.content } });
+        navigate('/edit-template', { state: { templateFile: template.file,templateId, latex: data.content } });
       } catch (error) {
         console.error("Error fetching LaTeX code: ", error);
       }

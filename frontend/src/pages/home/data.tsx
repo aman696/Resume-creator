@@ -23,8 +23,8 @@ export const features = [
   ];
 
 export const templates = [
-  { id: 1, name: "Professional", file: template2 },
-  { id: 2, name: "Creative", file: template1 },
+  { id: 1, name: "Professional", file: template1 },
+  { id: 2, name: "Creative", file: template2 },
   { id: 3, name: "Minimalist", file: template3 },
 ];
 

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>John Doe - Resume</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 40px;
+            color: #333;
+            background-color: #fff;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0;
+        }
+
+        h1 {
+            color: MidnightBlue;
+            border-bottom: 2px solid MidnightBlue;
+            padding-bottom: 5px;
+        }
+
+        a {
+            color: MidnightBlue;
+            text-decoration: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: MidnightBlue;
+            margin-bottom: 10px;
+            border-bottom: 1px solid MidnightBlue;
+        }
+
+        .experience, .education, .projects {
+            margin-bottom: 10px;
+        }
+
+        .job-title, .project-title {
+            font-weight: 500;
+        }
+
+        .location, .date {
+            float: right;
+            font-weight: 400;
+        }
+
+        ul {
+            margin: 5px 0 15px 20px;
+            padding: 0;
+        }
+
+        li::marker {
+            color: MidnightBlue;
+        }
+
+        .skills {
+            display: flex;
+            gap: 50px;
+        }
+
+        .skills div {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header" data-latex-id="header">
+        <h1>John Doe</h1>
+        <p>Rando, Canada | +1 333-333-3333 | <a href="mailto:john@johndoe.com">john@johndoe.com</a></p>
+        <p>
+            <a href="https://www.linkedin.com/in/rick-astley-b6a42b24/">LinkedIn</a> | 
+            <a href="https://github.com/topics/rick-astley">GitHub</a>
+        </p>
+    </div>
+
+    <div class="section" data-latex-id="education">
+        <div class="section-title">Education</div>
+        <div class="education" data-latex-id="education-item-1">
+            <strong>Master of Engineering (Thesis) - Mechanical</strong>
+            <span class="date">Sep 2018 - Apr 2021</span>
+            <div>Rando University, San Francisco, CA</div>
+        </div>
+        <div class="education" data-latex-id="education-item-2">
+            <strong>Bachelor of Engineering - Mechanical</strong>
+            <span class="date">Sep 2013 - Apr 2018</span>
+            <div>Rando University, San Francisco, CA</div>
+        </div>
+    </div>
+
+    <div class="section" data-latex-id="skills">
+        <div class="section-title">Skills</div>
+        <div class="skills">
+            <div><strong>Programming Languages:</strong> Python, Java, C++, C, C#, JavaScript, MATLAB, Simulink</div>
+            <div><strong>Technologies:</strong> AWS BS/EC/EC2/ELB, Azure AD, Docker, React.js, Flask, Redis, Spring, Android, ROS</div>
+        </div>
+    </div>
+
+    <div class="section" data-latex-id="experience">
+        <div class="section-title">Experience</div>
+        <div class="experience" data-latex-id="experience-item-1">
+            <strong class="job-title">Graduate Control Systems Researcher, Rando University</strong>
+            <span class="date">May 2018 - Mar 2021</span>
+            <div>San Francisco, CA</div>
+            <ul>
+                <li>Developed a novel modification to quaternion-based quadrotor control system.</li>
+                <li>Modeled and simulated quadrotor dynamics in MATLAB/Simulink.</li>
+                <li>Adapted existing C++ code for ROS/Gazebo simulations.</li>
+            </ul>
+        </div>
+        <div class="experience" data-latex-id="experience-item-2">
+            <strong class="job-title">Satellite Simulations Intern, Rando Space Company</strong>
+            <span class="date">Sep 2017 - Dec 2017</span>
+            <div>San Francisco, CA</div>
+            <ul>
+                <li>Performed Monte Carlo simulations using Python for critical mission reviews.</li>
+                <li>Validated and improved simulation models.</li>
+                <li>Generated detailed mission reliability reports.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" data-latex-id="projects">
+        <div class="section-title">Notable Projects</div>
+        <div class="projects" data-latex-id="project-item-1">
+            <strong class="project-title">Full Stack Developer, RandoSite.com</strong>
+            <span class="date">Mar 2021 - Sep 2021</span>
+            <div>San Francisco, CA</div>
+            <ul>
+                <li>Built an open-source web app for Monte Carlo option trading using React and Flask.</li>
+                <li>Optimized Python API for high performance, implemented AWS load balancing and Azure AD.</li>
+                <li>Docker Compose containerization.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" data-latex-id="publications">
+        <div class="section-title">Publications</div>
+        <div data-latex-id="publication-item-1">
+            <ul>
+                <li><strong>John Doe</strong> and FirstName LastName, \"Super Awesome Modification for UAV Control Systems,\" <em>2020 ICSCS</em>, Paris, France.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

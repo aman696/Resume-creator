@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
     exclude: ['latex.js'],
     
   },
+  assetsInclude: ['**/*.html'],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
