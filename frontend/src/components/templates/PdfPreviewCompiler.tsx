@@ -7,13 +7,16 @@ import { Maximize, X, Download, Edit, Save } from "lucide-react";
 import template1 from "../../assets/template1.html";
 import template2 from "../../assets/template2.html";
 import template3 from "../../assets/template3.html";
+import { extractHtmlEdits } from "./syncUtils";
+import { injectLatexIntoHtml } from './syncUtils';
 
 interface TemplatePreviewProps {
   latexCode: string; // kept for backward compatibility; not used now
   templateId: number;
+  onSaveSync: (htmlEdits: Record<string, string>) => void;
 }
 
-const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId }) => {
+const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId, onSaveSync }) => {
   const [templateUrl, setTemplateUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -26,13 +29,11 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
   const originalHtmlRef = useRef<string | null>(null);
 
-  // Utility: create a blob URL for the updated HTML
   const createBlobUrl = (html: string) => {
     const blob = new Blob([html], { type: "text/html" });
     return URL.createObjectURL(blob);
   };
 
-  // Load the template HTML
   const loadTemplate = async (showMessages = true) => {
     if (showMessages) {
       setErrorMsg(null);
@@ -42,19 +43,14 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
     try {
       let selectedTemplate: string | null = null;
       const id = Number(templateId);
-      console.log("Template ID:", id);
-      if (id === 1) {
-        selectedTemplate = template1;
-      } else if (id === 2) {
-        selectedTemplate = template2;
-      } else if (id === 3) {
-        selectedTemplate = template3;
-      } else {
+      if (id === 1) selectedTemplate = template1;
+      else if (id === 2) selectedTemplate = template2;
+      else if (id === 3) selectedTemplate = template3;
+      else {
         if (showMessages) setErrorMsg("Invalid template selection.");
         return;
       }
 
-      // Always fetch the original template
       fetch(selectedTemplate)
         .then((response) => response.text())
         .then((html) => {
@@ -79,14 +75,12 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
     }
   };
 
-  // On mount or when templateId changes, load once
   useEffect(() => {
     if (templateId && initialLoad) {
       loadTemplate(false);
       setInitialLoad(false);
     }
     return () => {
-      // Cleanup any blob URLs
       if (templateUrl && templateUrl.startsWith("blob:")) {
         URL.revokeObjectURL(templateUrl);
       }
@@ -204,6 +198,8 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
       setErrorMsg("Cannot save changes. Document not available.");
       return;
     }
+    const edits = extractHtmlEdits(doc);
+onSaveSync(edits); // Send updates back to parent
     // Remove contentEditable from all elements
     const editableElements = doc.querySelectorAll('[contenteditable="true"]');
     editableElements.forEach((el) => {

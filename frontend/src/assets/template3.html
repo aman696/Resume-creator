@@ -13,16 +13,14 @@
       background-color: #fff;
     }
     body {
-      /* Mimic 1 inch side margins, 1 inch top/bottom. 
-         Adjust as you see fit for your 'LaTeX-like' format. */
+      /* Mimic 1 inch side margins, 1 inch top/bottom */
       padding: 1in;
-      font-size: 11pt;    /* typical LaTeX font size */
-      line-height: 1.3;   /* typical LaTeX line spacing */
-      max-width: 8.5in;   /* letter width */
-      margin: 0 auto;     /* center if on a wider screen */
+      font-size: 11pt;
+      line-height: 1.3;
+      max-width: 8.5in;
+      margin: 0 auto;
       box-sizing: border-box;
     }
-
     /* HEADER (Name + Contact Info) */
     .resume-header {
       text-align: center;
@@ -43,8 +41,7 @@
       text-decoration: underline;
       color: inherit;
     }
-
-    /* SECTION TITLES: small caps + thin rule below */
+    /* SECTION TITLES */
     .section-title {
       font-size: 1rem;
       font-weight: 600;
@@ -59,14 +56,12 @@
       background-color: #000;
       margin-top: 0.3rem;
     }
-
-    /* SUBHEADING LISTS (like \resumeSubHeadingListStart) */
+    /* Lists and subheadings */
     .subheading-list {
       list-style: none;
       padding-left: 0;
       margin: 0 0 1.2rem 0;
     }
-    /* Each subheading item (like \resumeSubheading) - 2 columns: left text, right text */
     .subheading-item {
       margin-bottom: 0.8rem;
     }
@@ -87,7 +82,6 @@
       white-space: nowrap;
       margin-left: 1rem;
     }
-    /* Second row with italic text (like role vs. dates) */
     .subheading-row-secondary {
       display: flex;
       justify-content: space-between;
@@ -95,26 +89,15 @@
       font-style: italic;
       font-weight: normal;
     }
-    .subheading-row-secondary .left {
-      text-align: left;
-    }
-    .subheading-row-secondary .right {
-      text-align: right;
-      margin-left: 1rem;
-      white-space: nowrap;
-    }
-
-    /* BULLET LISTS with minimal spacing, close to "nosep" in LaTeX */
-    ul.bullet-list {
-      margin: 0.4rem 0 0.8rem 1.2rem; /* small indent */
+    .bullet-list {
+      margin: 0.4rem 0 0.8rem 1.2rem;
       padding-left: 0;
       list-style: disc;
     }
-    ul.bullet-list li {
+    .bullet-list li {
       margin-bottom: 0.3rem;
     }
-
-    /* "Tabular" style row for certifications (side by side) */
+    /* For certifications or tabular rows */
     .tabular-row {
       display: flex;
       justify-content: space-between;
@@ -127,15 +110,10 @@
       margin-left: 1rem;
       white-space: nowrap;
     }
-
-    /* For small details at the end of each bullet section */
-    .resumeItemListEnd {
-      margin-bottom: 0.5rem;
-    }
   </style>
 </head>
 <body>
-  <!-- HEADER SECTION START -->
+  <!-- HEADER SECTION (matches LaTeX block: header) -->
   <header class="resume-header" data-latex-id="header">
     <h1>Your Name</h1>
     <div class="contact-info">
@@ -145,9 +123,8 @@
       <a href="https://github.com/yourusername">github.com/yourusername</a>
     </div>
   </header>
-  <!-- HEADER SECTION END -->
 
-  <!-- EDUCATION SECTION START -->
+  <!-- EDUCATION SECTION (matches LaTeX block: education) -->
   <section data-latex-id="education">
     <div class="section-title">Education</div>
     <ul class="subheading-list">
@@ -158,9 +135,7 @@
           <div class="right">City, State</div>
         </div>
         <div class="subheading-row-secondary">
-          <div class="left">
-            Bachelor of Science in Computer Science
-          </div>
+          <div class="left">Bachelor of Science in Computer Science</div>
           <div class="right">Expected Graduation: May 2025</div>
         </div>
         <ul class="bullet-list" data-latex-id="education-item-1-bullets">
@@ -169,7 +144,6 @@
           <li>Relevant Coursework: Data Structures, Algorithms, Database Systems, Web Development</li>
         </ul>
       </li>
-
       <!-- Second education item -->
       <li class="subheading-item" data-latex-id="education-item-2">
         <div class="subheading-row">
@@ -177,9 +151,7 @@
           <div class="right">City, State</div>
         </div>
         <div class="subheading-row-secondary">
-          <div class="left">
-            High School Diploma
-          </div>
+          <div class="left">High School Diploma</div>
           <div class="right">Graduated: May 2021</div>
         </div>
         <ul class="bullet-list" data-latex-id="education-item-2-bullets">
@@ -189,141 +161,36 @@
       </li>
     </ul>
   </section>
-  <!-- EDUCATION SECTION END -->
 
-  <!-- PROJECTS SECTION START -->
+  <!-- PROJECTS SECTION (matches LaTeX block: projects) -->
   <section data-latex-id="projects">
     <div class="section-title">Projects</div>
     <ul class="subheading-list">
-      <!-- Personal Portfolio Website -->
       <li class="subheading-item" data-latex-id="project-portfolio">
         <div class="subheading-row">
           <div class="left">
             <strong>Personal Portfolio Website</strong> | <em>HTML, CSS, JavaScript, Bootstrap</em>
           </div>
-          <div class="right">
-            Jan 2023 -- Present
-          </div>
-        </div>
-        <ul class="bullet-list" data-latex-id="project-portfolio-bullets">
-          <li>Designed and developed a responsive personal portfolio website to showcase projects and skills</li>
-          <li>Implemented responsive design principles to ensure compatibility across various devices</li>
-          <li>Utilized Bootstrap framework for layout and styling components</li>
-        </ul>
-      </li>
-      <!-- Student Management System -->
-      <li class="subheading-item" data-latex-id="project-student">
-        <div class="subheading-row">
-          <div class="left">
-            <strong>Student Management System</strong> | <em>Python, SQLite, Tkinter</em>
-          </div>
-          <div class="right">
-            Sept 2022 -- Dec 2022
-          </div>
-        </div>
-        <ul class="bullet-list" data-latex-id="project-student-bullets">
-          <li>Developed a desktop application to manage student information and academic records</li>
-          <li>Implemented CRUD operations using SQLite database to store and retrieve student data</li>
-          <li>Created a user-friendly interface using Tkinter for easy navigation and data entry</li>
-        </ul>
-      </li>
-      <!-- Weather Forecast App -->
-      <li class="subheading-item" data-latex-id="project-weather">
-        <div class="subheading-row">
-          <div class="left">
-            <strong>Weather Forecast App</strong> | <em>JavaScript, React, OpenWeather API</em>
-          </div>
-          <div class="right">
-            Mar 2023 -- May 2023
-          </div>
-        </div>
-        <ul class="bullet-list" data-latex-id="project-weather-bullets">
-          <li>Built a web application that displays weather information for user-selected locations</li>
-          <li>Integrated with OpenWeather API to fetch real-time weather data</li>
-          <li>Implemented location search functionality and responsive design for mobile users</li>
-        </ul>
-      </li>
-    </ul>
-  </section>
-  <!-- PROJECTS SECTION END -->
-
-  <!-- EXTRACURRICULAR ACTIVITIES SECTION START -->
-  <section data-latex-id="extracurricular">
-    <div class="section-title">Extracurricular Activities</div>
-    <ul class="subheading-list">
-      <!-- Computer Science Club -->
-      <li class="subheading-item" data-latex-id="extra-csclub">
-        <div class="subheading-row">
-          <div class="left">Computer Science Club</div>
-          <div class="right">Sept 2022 -- Present</div>
-        </div>
-        <div class="subheading-row-secondary">
-          <div class="left">
-            <em>Active Member</em>
-          </div>
-          <div class="right">
-            <em>University Name</em>
-          </div>
-        </div>
-        <ul class="bullet-list" data-latex-id="extra-csclub-bullets">
-          <li>Participate in weekly coding challenges and hackathons</li>
-          <li>Collaborate with peers on group programming projects</li>
-        </ul>
-      </li>
-      <!-- Volunteer Teaching Assistant -->
-      <li class="subheading-item" data-latex-id="extra-volunteer">
-        <div class="subheading-row">
-          <div class="left">Volunteer Teaching Assistant</div>
           <div class="right">Jan 2023 -- Present</div>
         </div>
-        <div class="subheading-row-secondary">
-          <div class="left">
-            <em>Programming Basics Workshop</em>
-          </div>
-          <div class="right">
-            <em>Community Center</em>
-          </div>
-        </div>
-        <ul class="bullet-list" data-latex-id="extra-volunteer-bullets">
-          <li>Help instruct beginner programming workshops for high school students</li>
-          <li>Develop learning materials and assist with coding exercises</li>
+        <ul class="bullet-list" data-latex-id="project-portfolio-bullets">
+          <li>Designed and developed a responsive personal portfolio website</li>
+          <li>Implemented responsive design principles</li>
+          <li>Utilized Bootstrap framework</li>
         </ul>
       </li>
     </ul>
   </section>
-  <!-- EXTRACURRICULAR ACTIVITIES SECTION END -->
 
-  <!-- CERTIFICATIONS SECTION START -->
-  <section data-latex-id="certifications">
-    <div class="section-title">Certifications</div>
-    <ul class="subheading-list">
-      <li class="subheading-item" data-latex-id="cert-1">
-        <div class="tabular-row">
-          <span>Web Development Bootcamp Certificate</span>
-          <span>June 2023</span>
-        </div>
-      </li>
-      <li class="subheading-item" data-latex-id="cert-2">
-        <div class="tabular-row">
-          <span>Python Programming Certificate</span>
-          <span>August 2022</span>
-        </div>
-      </li>
-    </ul>
-  </section>
-  <!-- CERTIFICATIONS SECTION END -->
-
-  <!-- SKILLS SECTION START -->
-  <section data-latex-id="technical_skills">
+  <!-- TECHNICAL SKILLS SECTION (matches LaTeX block: skills) -->
+  <section data-latex-id="skills">
     <div class="section-title">Technical Skills</div>
-    <ul class="bullet-list" style="list-style-type:none; margin-left:0;" data-latex-id="skills">
+    <ul class="bullet-list" style="list-style-type:none; margin-left:0;">
       <li><strong>Languages:</strong> Python, Java, HTML, CSS, JavaScript, SQL</li>
       <li><strong>Frameworks & Libraries:</strong> React, Bootstrap, jQuery, Flask</li>
       <li><strong>Developer Tools:</strong> Git, GitHub, VS Code, PyCharm, Figma</li>
       <li><strong>Other Skills:</strong> Responsive Web Design, Database Design, UI/UX Design</li>
     </ul>
   </section>
-  <!-- SKILLS SECTION END -->
-
 </body>
 </html>

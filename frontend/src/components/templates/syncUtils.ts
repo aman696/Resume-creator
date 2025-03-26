@@ -1,120 +1,89 @@
-// Example: Replaces content in latexString based on `data-latex-id` in htmlString
-export function syncHtmlToLatex(htmlString: string, latexString: string): string {
-    let updatedLatex = latexString;
-  
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, "text/html");
-  
-    const elements = doc.querySelectorAll("[data-latex-id]");
-    elements.forEach((el) => {
-      const blockId = el.getAttribute("data-latex-id");
-      if (!blockId) return;
-  
-      // The new text from HTML – e.g. innerText or textContent.
-      const newText = el.textContent?.trim() || "";
-  
-      // In your .tex, you might have:
-      // % BEGIN_blockId
-      //   ...stuff...
-      // % END_blockId
-      const regex = new RegExp(`(% BEGIN_${blockId}[\\s\\S]*?% END_${blockId})`, "m");
-      // We'll replace the entire block with that same block, but our new text in between
-      const replacement = `% BEGIN_${blockId}\n${newText}\n% END_${blockId}`;
-  
-      updatedLatex = updatedLatex.replace(regex, replacement);
-    });
-  
-    return updatedLatex;
-  }
-  
-  // Example: Replaces content in htmlString based on blocks in latexString
-  export function syncLatexToHtml(latexString: string, htmlString: string): string {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, "text/html");
-  
-    // Regex to find % BEGIN_id ... % END_id
-    const blockRegex = /% BEGIN_([^\s]+)([\s\S]*?)% END_\1/g;
-    let match;
-    while ((match = blockRegex.exec(latexString)) !== null) {
-      const blockId = match[1];
-      const content = match[2].trim();
-  
-      // In the HTML, find the data-latex-id
-      const el = doc.querySelector(`[data-latex-id="${blockId}"]`);
-      if (el) {
-        // Overwrite text. (Or do el.innerHTML = content, if you have HTML.)
-        el.textContent = content;
-      }
-    }
-  
-    return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-  }
-export function highlightInHtml(
-  htmlString: string,
-  blockId: string,
-  highlight: boolean
+export function applyHtmlEditsToLatex(
+  latex: string,
+  edits: Record<string, string>
 ): string {
-  // We'll parse the HTML, find the element with data-latex-id="blockId",
-  // add or remove an inline style or a class for highlight.
-
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlString, "text/html");
-
-  const el = doc.querySelector(`[data-latex-id="${blockId}"]`);
-  if (!el) {
-    // not found, just return unchanged
-    return htmlString;
-  }
-
-  if (highlight) {
-    el.setAttribute("style", "background: yellow;");
-  } else {
-    // remove the style or set it to empty
-    el.removeAttribute("style");
-  }
-
-  return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+  return latex.replace(/% BEGIN_(\w+)([\s\S]*?)% END_\1/g, (match, id, body) => {
+    if (!edits[id]) return match;
+    return `% BEGIN_${id}\n${edits[id]}\n% END_${id}`;
+  });
 }
-// highlightInLatex(latexString, blockId, highlight = true)
-export function highlightInLatex(
-    latexString: string,
-    blockId: string,
-    highlight: boolean
-  ): string {
-    // We'll find the block: % BEGIN_blockId ... % END_blockId
-    // and insert a comment line or wrap it in some macro.
-    // e.g. \hlstart ... \hlend
-  
-    // Simple approach: wrap the entire block with some custom latex markup
-    // e.g. "<<<HIGHLIGHT_START>>> ... <<<HIGHLIGHT_END>>>"
-    // or if you want an actual LaTeX macro, do something like:
-    // \hlstart
-    // block content
-    // \hlend
-  
-    const blockRegex = new RegExp(
-      `(\\% BEGIN_${blockId}[\\s\\S]*?\\% END_${blockId})`,
-      "m"
-    );
-  
-    // If not found, return unchanged
-    if (!blockRegex.test(latexString)) {
-      return latexString;
+export function extractHtmlEdits(doc: Document): Record<string, string> {
+  const changes: Record<string, string> = {};
+  const elements = doc.querySelectorAll("[data-latex-id]");
+
+  elements.forEach((el) => {
+    const id = el.getAttribute("data-latex-id");
+    if (id) {
+      changes[id] = (el as HTMLElement).innerText.trim();
     }
+  });
+
+  return changes;
+}
+export function injectDataIdsIntoHtml(html: string, latexCode: string): string {
+  const ids = [...latexCode.matchAll(/% BEGIN_(\S+)/g)].map(m => m[1]);
+  let updatedHtml = html;
+
+  ids.forEach(id => {
+    const regex = new RegExp(`(<div[^>]*class="[^"]*"[^>]*>[^<]*${id}[^<]*</div>)`);
+    updatedHtml = updatedHtml.replace(regex, match => {
+      if (!match.includes('data-latex-id')) {
+        return match.replace('<div', `<div data-latex-id="${id}"`);
+      }
+      return match;
+    });
+  });
+
+  return updatedHtml;
+}
+export function injectLatexIntoHtml(html: string, latex: string): string {   
+  const parser = new DOMParser();   
+  const doc = parser.parseFromString(html, 'text/html');    
   
-    // If highlight = true, we add markers. If false, we remove them.
-    if (highlight) {
-      // Add some markers around the entire block
-      return latexString.replace(blockRegex, (match) => {
-        return `\\hlstart\n${match}\n\\hlend`;
-      });
-    } else {
-      // remove existing highlight macros if present
-      // e.g. if we see \hlstart ... \hlend, remove them
-      return latexString.replace(blockRegex, (match) => {
-        const removeHl = match.replace(/\\hlstart\s*/g, "").replace(/\\hlend\s*/g, "");
-        return removeHl;
-      });
-    }
-  }
-  
+  const blockRegex = /% BEGIN_(\w+)([\s\S]*?)% END_\1/g;   
+  const blocks: Record<string, { 
+    content: string, 
+    elements: HTMLElement[] 
+  }> = {};    
+
+  let match;   
+  while ((match = blockRegex.exec(latex)) !== null) {     
+    const blockId = match[1];     
+    const content = match[2].trim();     
+    
+    // Find all elements with this block ID
+    const elements = Array.from(
+      doc.querySelectorAll(`[data-latex-id="${blockId}"]`)
+    ) as HTMLElement[];
+    
+    blocks[blockId] = { content, elements };   
+  }    
+
+  Object.entries(blocks).forEach(([id, { content, elements }]) => {     
+    if (!elements.length) return;
+
+    const lines = content       
+      .split(/\r?\n/)       
+      .map(line => line.trim())       
+      .filter(Boolean);      
+
+    const extractTextInBraces = (line: string): string[] => {       
+      const matches = [...line.matchAll(/\{([^}]*)\}/g)];       
+      return matches.map(m => m[1].trim());     
+    };      
+
+    elements.forEach(target => {
+      // Only allow text changes: update only the text content inside the block
+      // We'll scan child nodes and replace their text content with matching LaTeX lines
+      const textNodes: HTMLElement[] = Array.from(target.querySelectorAll('*'))       
+        .filter(el => el.children.length === 0) as HTMLElement[];      
+
+      for (let i = 0; i < Math.min(lines.length, textNodes.length); i++) {       
+        const parts = extractTextInBraces(lines[i]);       
+        textNodes[i].textContent = parts.join(' ').trim();     
+      }   
+    });
+  });    
+
+  return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML; 
+}

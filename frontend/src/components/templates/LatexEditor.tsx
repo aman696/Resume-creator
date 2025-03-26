@@ -1,37 +1,20 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { EditorState } from "@codemirror/state";
+import { EditorView, basicSetup } from "codemirror";
 
 interface LatexEditorProps {
-  latexCode: string;            // Full .tex code including marker lines
+  latexCode: string;
   setLatexCode: (code: string) => void;
 }
 
-/**
- * We hide lines starting with '%' from the display.
- * buildDisplayLines returns display lines + a lineMap telling
- * us which original line each displayed line came from.
- */
 function buildDisplayLines(originalText: string) {
   const originalLines = originalText.split("\n");
-  const displayLines: string[] = [];
-  const lineMap: number[] = [];
-
-  for (let i = 0; i < originalLines.length; i++) {
-    const line = originalLines[i];
-    // skip lines that start with '%'
-    if (line.trim().startsWith("%")) {
-      continue;
-    }
-    displayLines.push(line);
-    lineMap.push(i);
-  }
+  const displayLines = [...originalLines];
+  const lineMap = originalLines.map((_, idx) => idx);
   return { displayLines, lineMap };
 }
 
-/**
- * Put changed display lines back into the original text
- * while preserving the hidden lines (comments, markers).
- */
 function reconstructOriginalText(
   displayLines: string[],
   lineMap: number[],
@@ -39,7 +22,6 @@ function reconstructOriginalText(
 ): string {
   const originalLines = originalText.split("\n");
   const updated = [...originalLines];
-
   displayLines.forEach((dispLine, idx) => {
     const origIndex = lineMap[idx];
     if (origIndex != null) {
@@ -49,57 +31,70 @@ function reconstructOriginalText(
   return updated.join("\n");
 }
 
-/**
- * Finds the difference (the substring that was removed)
- * between `oldStr` and `newStr` in a naive way:
- *  - find the first index from left where they differ
- *  - find the first index from right where they differ
- *  - the substring in oldStr between those indexes is "removed"
- */
 function findRemoval(oldStr: string, newStr: string): string | null {
-  // If new is longer or equal, we do not treat it as a removal
-  if (newStr.length >= oldStr.length) {
-    return null;
-  }
-
+  if (newStr.length >= oldStr.length) return null;
   let start = 0;
   const minLen = Math.min(oldStr.length, newStr.length);
-  // move from left while they match
-  while (start < minLen && oldStr[start] === newStr[start]) {
-    start++;
-  }
-  // if we consumed entire newStr, the rest is removed
+  while (start < minLen && oldStr[start] === newStr[start]) start++;
   if (start === newStr.length && newStr.length < oldStr.length) {
     return oldStr.slice(start);
   }
-
   let endOld = oldStr.length - 1;
   let endNew = newStr.length - 1;
-  // move from right while they match
   while (endOld >= 0 && endNew >= 0 && oldStr[endOld] === newStr[endNew]) {
     endOld--;
     endNew--;
   }
-
-  if (endOld >= start) {
-    // substring in oldStr that was removed
-    return oldStr.slice(start, endOld + 1);
-  }
+  if (endOld >= start) return oldStr.slice(start, endOld + 1);
   return null;
 }
+function validateLatexMarkers(code: string) {
+  const beginMarkers = (code.match(/% BEGIN_\w+/g) || []);
+  const endMarkers: string[] = (code.match(/% END_\w+/g) || []);
 
-/**
- * Attempt to find which marker block the user is in, if any
- */
-function findMarkerBlockForLine(originalLines: string[], lineIndex: number): string | null {
-  interface Block { id: string; start: number; end: number; }
-  const blocks: Block[] = [];
+  const errors: string[] = [];
+  
+  if (beginMarkers.length !== endMarkers.length) {
+    errors.push("Unbalanced markers: Number of BEGIN and END markers do not match.");
+  }
+
+  const unmatchedBegins = beginMarkers.filter(
+    begin => !endMarkers.includes(begin.replace('BEGIN', 'END'))
+  );
+
+  if (unmatchedBegins.length > 0) {
+    errors.push(`Unmatched BEGIN markers: ${unmatchedBegins.join(', ')}`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+// Enhance findMarkerBlockForLine to provide more context
+function findMarkerBlockForLine(originalLines: string[], lineIndex: number): { 
+  blockId: string | null, 
+  blockStart: number, 
+  blockEnd: number,
+  isMarkerLine: boolean 
+} {
+  const blocks: Array<{
+    id: string, 
+    start: number, 
+    end: number
+  }> = [];
 
   originalLines.forEach((line, idx) => {
-    const beginMatch = line.match(/^% BEGIN_([^\s]+)/);
-    const endMatch = line.match(/^% END_([^\s]+)/);
+    const beginMatch = line.match(/^% BEGIN_(\w+)/);
+    const endMatch = line.match(/^% END_(\w+)/);
+    
     if (beginMatch) {
-      blocks.push({ id: beginMatch[1], start: idx, end: -1 });
+      blocks.push({ 
+        id: beginMatch[1], 
+        start: idx, 
+        end: -1 
+      });
     } else if (endMatch) {
       const blk = blocks.find(b => b.id === endMatch[1] && b.end === -1);
       if (blk) {
@@ -107,140 +102,223 @@ function findMarkerBlockForLine(originalLines: string[], lineIndex: number): str
       }
     }
   });
-  // If no end, treat to last line
+
   blocks.forEach(b => {
     if (b.end === -1) b.end = originalLines.length - 1;
   });
 
   for (const b of blocks) {
     if (b.start <= lineIndex && lineIndex <= b.end) {
-      return b.id;
+      return {
+        blockId: b.id,
+        blockStart: b.start,
+        blockEnd: b.end,
+        isMarkerLine: lineIndex === b.start || lineIndex === b.end
+      };
     }
   }
-  return null;
+
+  return { 
+    blockId: null, 
+    blockStart: -1, 
+    blockEnd: -1,
+    isMarkerLine: false
+  };
 }
 
 const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode }) => {
-  const [displayLines, setDisplayLines] = useState<string[]>([]);
-  const [lineMap, setLineMap] = useState<number[]>([]);
-  const oldDisplayRef = useRef<string>("");  // track the old display text
+  const editorRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const [markerWarnings, setMarkerWarnings] = useState<string[]>([]);
 
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const handleClear = () => {
+    if (viewRef.current) {
+      const transaction = viewRef.current.state.update({
+        changes: { from: 0, to: viewRef.current.state.doc.length, insert: '' }
+      });
+      viewRef.current.dispatch(transaction);
+      setLatexCode('');
+      setEditorError(null);
+    }
+  };
+  // Clear editor function
 
-  // Build display lines for user
+  const handleLatexCodeChange = (newCode: string) => {
+    const validation = validateLatexMarkers(newCode);
+    
+    if (!validation.isValid) {
+      setMarkerWarnings(validation.errors);
+    } else {
+      setMarkerWarnings([]);
+    }
+
+    setLatexCode(newCode);
+  };
   useEffect(() => {
-    const { displayLines, lineMap } = buildDisplayLines(latexCode);
-    setDisplayLines(displayLines);
-    setLineMap(lineMap);
-    // store the joined text in oldDisplayRef for comparison
-    oldDisplayRef.current = displayLines.join("\n");
+    if (!editorRef.current) return;
+
+    try {
+      const { displayLines, lineMap } = buildDisplayLines(latexCode);
+      const oldText = displayLines.join("\n");
+
+      const state = EditorState.create({
+        doc: oldText,
+        extensions: [
+          basicSetup,
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              const newText = update.state.doc.toString();
+              const removed = findRemoval(oldText, newText);
+              
+              // Validate markers on each change
+              const validation = validateLatexMarkers(newText);
+              if (!validation.isValid) {
+                setMarkerWarnings(validation.errors);
+              } else {
+                setMarkerWarnings([]);
+              }
+
+              if (removed) {
+                console.log(`removed "${removed}"`);
+              }
+
+              const newLines = newText.split("\n");
+              const newOriginal = reconstructOriginalText(newLines, lineMap, latexCode);
+              handleLatexCodeChange(newOriginal);
+            }
+          }),
+        ],
+      });
+      const view = new EditorView({
+        state,
+        parent: editorRef.current,
+      });
+
+      viewRef.current = view;
+
+      return () => {
+        view.destroy();
+      };
+    } catch (error) {
+      setEditorError('Failed to initialize editor');
+      console.error(error);
+    }
   }, [latexCode]);
 
-  const displayText = displayLines.join("\n");
+  const handleClick = () => {
+    if (!viewRef.current) return;
 
-  // On user typing
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newDisplayText = e.target.value;
-    const oldDisplayText = oldDisplayRef.current;
-    // check if there's a removal
-    const removed = findRemoval(oldDisplayText, newDisplayText);
-    if (removed) {
-      console.log(`removed "${removed}"`);
-    }
+    try {
+      const pos = viewRef.current.state.selection.main.head;
+      const text = viewRef.current.state.doc.toString();
+      const lines = text.split("\n");
+      let line = 0,
+        charCount = 0;
+      while (line < lines.length && charCount + lines[line].length < pos) {
+        charCount += lines[line].length + 1;
+        line++;
+      }
 
-    // Now update local state
-    const newDisplayLines = newDisplayText.split("\n");
-    setDisplayLines(newDisplayLines);
-
-    // Rebuild the original code and pass up
-    const newOriginal = reconstructOriginalText(newDisplayLines, lineMap, latexCode);
-    setLatexCode(newOriginal);
-
-    // Update oldDisplayRef
-    oldDisplayRef.current = newDisplayText;
-  };
-
-  // On user clicking in the text area
-  const handleClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
-    if (!textareaRef.current) return;
-    const textArea = textareaRef.current;
-
-    const position = textArea.selectionStart;
-    const upToCursor = displayText.slice(0, position);
-    const linesSoFar = upToCursor.split("\n");
-    const displayLineIndex = linesSoFar.length - 1;
-    if (displayLineIndex < 0) {
-      console.log("Clicked, no line found");
-      return;
-    }
-    const colInLine = linesSoFar[displayLineIndex].length;
-    const origLineIndex = lineMap[displayLineIndex];
-    if (origLineIndex == null) {
-      console.log("Clicked, but line map missing");
-      return;
-    }
-
-    // see if there's a block
-    const originalLines = latexCode.split("\n");
-    const blockId = findMarkerBlockForLine(originalLines, origLineIndex);
-    if (blockId) {
-      console.log(`Inside block: ${blockId}`);
-    } else {
-      console.log("No marker block found for that line.");
+      const originalLines = latexCode.split("\n");
+      const { blockId, blockStart, blockEnd, isMarkerLine } = findMarkerBlockForLine(originalLines, line);
+      
+      if (blockId) {
+        console.log(`Inside block: ${blockId}`);
+        
+        if (isMarkerLine) {
+          alert('⚠️ You are on a marker line. Modifying markers can break template synchronization.');
+        }
+      } else {
+        console.log("No marker block found for that line.");
+      }
+    } catch (error) {
+      setEditorError('Error processing line');
+      console.error(error);
     }
   };
 
   return (
-    <motion.div
-      className="flex flex-col h-full"
+    <motion.div 
+      className="container mx-auto px-4 py-6 max-w-4xl" 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg md:text-xl font-semibold text-[var(--primary)] flex items-center">
-          <span className="mr-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-5 h-5"
-            >
-              <path d="m18 16 4-4-4-4"/>
-              <path d="m6 8-4 4 4 4"/>
-              <path d="m14.5 4-5 16"/>
-            </svg>
-          </span>
+            {markerWarnings.length > 0 && (
+        <div className="mb-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+          <p className="font-bold">Marker Validation Warnings:</p>
+          <ul className="list-disc list-inside">
+            {markerWarnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div className="flex items-center justify-between mb-4 border-b pb-2 border-[var(--primary-dark)]">
+        <h2 className="text-2xl font-bold text-[var(--primary)] flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-6 h-6 mr-3"
+          >
+            <path d="m18 16 4-4-4-4" />
+            <path d="m6 8-4 4 4 4" />
+            <path d="m14.5 4-5 16" />
+          </svg>
           LaTeX Editor
         </h2>
       </div>
 
       <div className="relative flex-1 group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--primary-dark)] to-[var(--secondary-dark)] rounded-lg blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
-        <textarea
-          ref={textareaRef}
-          className="relative h-full w-full p-4 bg-[var(--dark-card-bg)] text-[var(--dark-text-primary)]
-                     border border-[var(--primary-dark)] rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-[var(--primary)]
-                     text-sm md:text-base font-mono resize-none
-                     shadow-inner transition-all duration-300"
-          value={displayText}
-          onChange={handleChange}
+        <div 
+          ref={editorRef}
           onClick={handleClick}
-          spellCheck={false}
-          style={{ lineHeight: 1.6 }}
+          className="relative h-full 
+            max-h-[600px] 
+            min-h-[400px] 
+            sm:min-h-[450px] 
+            md:min-h-[500px] 
+            lg:min-h-[550px] 
+            w-full 
+            rounded-lg 
+            bg-[var(--dark-card-bg)] 
+            border border-[var(--primary-dark)] 
+            shadow-lg 
+            p-4 
+            text-sm md:text-base 
+            font-mono 
+            overflow-auto 
+            focus:outline-none 
+            focus:ring-2 
+            focus:ring-[var(--primary)] 
+            transition-all 
+            duration-300"
         />
       </div>
 
-      <div className="mt-2 flex justify-between text-xs text-[var(--dark-text-muted)]">
-        <div>{displayText.length} characters</div>
+      {editorError && (
+        <div className="mt-2 text-red-500 text-sm">
+          {editorError}
+        </div>
+      )}
+
+      <div className="mt-2 flex justify-between items-center text-xs text-[var(--dark-text-muted)]">
+        <span>{latexCode.length} characters</span>
+        <button 
+          className="text-[var(--primary)] hover:text-[var(--secondary)] transition"
+          onClick={handleClear}
+        >
+          Clear Editor
+        </button>
       </div>
     </motion.div>
   );
 };
 
-export default LatexEditor;
+export default LatexEditor; 

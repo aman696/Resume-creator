@@ -5,21 +5,17 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import LatexEditor from '@/components/templates/LatexEditor';
 import PdfPreviewCompiler from '@/components/templates/PdfPreviewCompiler';
-import { syncLatexToHtml } from '@/components/templates';
-import { syncHtmlToLatex } from '@/components/templates';
-import { highlightInHtml } from '@/components/templates';
-import { highlightInLatex } from '@/components/templates';
+import { applyHtmlEditsToLatex } from '@/components/templates/syncUtils';
 const TemplateEditing = () => {
   const { state } = useLocation();
   const initialLatex = state?.latex || '';
   const [latexCode, setLatexCode] = useState(initialLatex);
   const [isMobilePanelEditor, setIsMobilePanelEditor] = useState(true);
   const templateId = state?.templateId;
-  // Detect screen size for mobile view
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
-        // Reset to default view on large screens
         setIsMobilePanelEditor(true);
       }
     };
@@ -28,13 +24,17 @@ const TemplateEditing = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // ✅ Function to sync HTML edits back into LaTeX
+  const onSaveSync = (htmlEdits: Record<string, string>) => {
+    const updatedLatex = applyHtmlEditsToLatex(latexCode, htmlEdits);
+    setLatexCode(updatedLatex);
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+      transition: { staggerChildren: 0.1 }
     }
   };
 
@@ -65,7 +65,6 @@ const TemplateEditing = () => {
           </h1>
           
           <div className="flex items-center gap-3">
-            {/* Mobile panel switcher - only visible on small screens */}
             <div className="flex bg-[var(--dark-section-bg)] p-1 rounded-lg lg:hidden">
               <button
                 onClick={() => setIsMobilePanelEditor(true)}
@@ -95,7 +94,7 @@ const TemplateEditing = () => {
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1">
                 <path d="m12 19-7-7 7-7"></path>
-                <path d="M19 12H5"></path>a
+                <path d="M19 12H5"></path>
               </svg>
               Back
             </Button>
@@ -106,7 +105,6 @@ const TemplateEditing = () => {
       {/* Main Content */}
       <div className="flex-1 container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6 h-full">
-          {/* Editor Section - on mobile this is conditionally shown */}
           <motion.section 
             className={`lg:w-1/2 ${isMobilePanelEditor ? 'block' : 'hidden'} lg:block`}
             variants={itemVariants}
@@ -116,19 +114,22 @@ const TemplateEditing = () => {
             </div>
           </motion.section>
 
-          {/* PDF Preview Section - on mobile this is conditionally shown */}
           <motion.section 
             className={`lg:w-1/2 ${!isMobilePanelEditor ? 'block' : 'hidden'} lg:block`}
             variants={itemVariants}
           >
             <div className="bg-[var(--dark-section-bg)] rounded-xl p-5 h-[calc(100vh-12rem)] shadow-xl">
-              <PdfPreviewCompiler templateId={templateId} latexCode={latexCode} />
+              <PdfPreviewCompiler
+                templateId={templateId}
+                latexCode={latexCode}
+                onSaveSync={onSaveSync}
+              />
             </div>
           </motion.section>
         </div>
       </div>
       
-      {/* Footer with tips */}
+      {/* Footer */}
       <motion.footer 
         className="py-4 px-6 bg-[var(--dark-card-bg)] border-t border-[var(--primary-dark)] text-center text-[var(--dark-text-muted)] text-xs"
         variants={itemVariants}
