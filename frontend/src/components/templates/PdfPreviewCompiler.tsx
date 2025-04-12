@@ -28,6 +28,88 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
   const modalIframeRef = useRef<HTMLIFrameElement>(null);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
   const originalHtmlRef = useRef<string | null>(null);
+  // ADD THIS FUNCTION near the top (after imports):
+const logDomStructure = async (html: string) => {
+  try {
+    const response = await fetch("http://localhost:8000/parse-html", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code: html }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to parse HTML:", await response.text());
+      return;
+    }
+
+    const result = await response.json();
+    console.log("🔍 Parsed DOM Tree:", result.dom);
+  } catch (error) {
+    console.error("Error during DOM parse API call:", error);
+  }
+};
+
+function getWordAtClick(element: HTMLElement, clickX: number, clickY: number): { word: string; rect?: DOMRect } {
+  const range = document.createRange();
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) =>
+        node.textContent && node.textContent.trim() !== ""
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT,
+    }
+  );
+
+  let foundChar = false;
+  let word = "";
+  let wordRect: DOMRect | undefined = undefined;
+
+  while (walker.nextNode()) {
+    const textNode = walker.currentNode;
+    const text = textNode.textContent || "";
+
+    for (let i = 0; i < text.length; i++) {
+      range.setStart(textNode, i);
+      range.setEnd(textNode, i + 1);
+      const rect = range.getBoundingClientRect();
+
+      if (
+        clickX >= rect.left &&
+        clickX <= rect.right &&
+        clickY >= rect.top &&
+        clickY <= rect.bottom
+      ) {
+        foundChar = true;
+
+        // Expand backwards
+        let start = i;
+        while (start > 0 && /\w/.test(text[start - 1])) start--;
+
+        // Expand forward
+        let end = i;
+        while (end < text.length && /\w/.test(text[end])) end++;
+
+        word = text.slice(start, end);
+
+        // Get bounding rect of full word
+        range.setStart(textNode, start);
+        range.setEnd(textNode, end);
+        wordRect = range.getBoundingClientRect();
+
+        break;
+      }
+    }
+
+    if (foundChar) break;
+  }
+
+  return { word, rect: wordRect };
+}
+
 
   const createBlobUrl = (html: string) => {
     const blob = new Blob([html], { type: "text/html" });
@@ -58,6 +140,9 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
           setHtmlContent(html);
           setTemplateUrl(createBlobUrl(html));
           if (showMessages) setSuccessMsg("Template loaded successfully!");
+        
+          // 🟡 Log parsed DOM here
+          logDomStructure(html);
         })
         .catch((error) => {
           console.error("Error fetching template HTML:", error);
@@ -155,14 +240,34 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
   // Handler that logs the data-latex-id
   const onDataIdClick = (ev: Event) => {
     ev.stopPropagation();
+    const mouseEvent = ev as MouseEvent;
     const target = ev.currentTarget as HTMLElement;
     const dataId = target.getAttribute("data-latex-id");
+  
     if (dataId) {
-      console.log("Clicked data-latex-id:", dataId);
-      window.dispatchEvent(new CustomEvent("latex-block-click", { detail: dataId }));
+      const { word, rect } = getWordAtClick(target, mouseEvent.clientX, mouseEvent.clientY);
+      console.log("🟡 Word clicked:", word);
+      if (rect) {
+        console.log("📍 Position:", {
+          top: Math.round(rect.top),
+          left: Math.round(rect.left),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        });
+      }
+      console.log("🆔 Block ID:", dataId);
+  
+      window.dispatchEvent(
+        new CustomEvent("latex-block-click", {
+          detail: {
+            blockId: dataId,
+            text: word || target.textContent?.trim() || "",
+          },
+        })
+      );
     }
   };
-
+  
   // Apply or remove edit mode
   const applyEditMode = (editable: boolean) => {
     if (mainIframeRef.current?.contentDocument) {
@@ -212,6 +317,7 @@ onSaveSync(edits); // Send updates back to parent
 
     // Extract new HTML
     const newHtml = "<!DOCTYPE html>" + doc.documentElement.outerHTML;
+    logDomStructure(newHtml); // 🟡 Log updated DOM
     setHtmlContent(newHtml);
 
     // Rebuild the blob URL

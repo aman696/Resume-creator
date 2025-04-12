@@ -7,6 +7,7 @@ interface LatexEditorProps {
   latexCode: string;
   setLatexCode: (code: string) => void;
   highlightedBlockId?: string | null;
+  highlightedText?: string | null;
 }
 
 function validateLatexMarkers(code: string) {
@@ -62,7 +63,7 @@ function findAstNodeByLine(ast: any[], targetLine: number, currentLine = { val: 
   return null;
 }
 
-const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode, highlightedBlockId }) => {
+const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode, highlightedBlockId, highlightedText }) => {
   const [markerWarnings, setMarkerWarnings] = useState<string[]>([]);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [latexAST, setLatexAST] = useState<any[]>([]);
@@ -85,14 +86,35 @@ const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode, high
 
     if (start !== -1 && end !== -1 && textareaRef.current) {
       const textBefore = lines.slice(0, start).join("\n");
+      const blockContent = lines.slice(start, end + 1).join("\n");
       const selectionStart = textBefore.length + (start > 0 ? 1 : 0);
-      const selectionEnd = selectionStart + lines.slice(start, end + 1).join("\n").length;
-
-      textareaRef.current.focus();
-      textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
+      
+      if (highlightedText && highlightedText.trim() !== "") {
+        // Find the specific text within the block
+        const blockStartPos = selectionStart;
+        const textPos = blockContent.indexOf(highlightedText);
+        
+        if (textPos !== -1) {
+          // Set selection to just the specific text
+          const exactStart = blockStartPos + textPos;
+          const exactEnd = exactStart + highlightedText.length;
+          
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(exactStart, exactEnd);
+        } else {
+          // Fallback to highlighting the whole block
+          const selectionEnd = selectionStart + blockContent.length;
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
+        }
+      } else {
+        // Fallback to highlighting the whole block
+        const selectionEnd = selectionStart + blockContent.length;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
+      }
     }
-  }, [highlightedBlockId, latexCode]);
-
+  }, [highlightedBlockId, highlightedText, latexCode]);
   const handleClear = () => {
     setLatexCode('');
     setMarkerWarnings([]);

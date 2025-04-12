@@ -9,6 +9,7 @@ import { applyHtmlEditsToLatex } from '@/components/templates/syncUtils';
 const TemplateEditing = () => {
   const [highlightedBlockId, setHighlightedBlockId] = useState<string | null>(null);
   const { state } = useLocation();
+  const [highlightedText, setHighlightedText] = useState<string | null>(null);
   const initialLatex = state?.latex || '';
   const [latexCode, setLatexCode] = useState(initialLatex);
   const [isMobilePanelEditor, setIsMobilePanelEditor] = useState(true);
@@ -31,6 +32,24 @@ const TemplateEditing = () => {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const detail = customEvent.detail;
+      
+      if (typeof detail === 'object') {
+        setHighlightedBlockId(detail.blockId);
+        setHighlightedText(detail.text);
+      } else {
+        // For backward compatibility
+        setHighlightedBlockId(detail);
+        setHighlightedText(null);
+      }
+    };
+  
+    window.addEventListener("latex-block-click", handler);
+    return () => window.removeEventListener("latex-block-click", handler);
   }, []);
 
   // ✅ Function to sync HTML edits back into LaTeX
@@ -120,10 +139,11 @@ const TemplateEditing = () => {
           >
             <div className="bg-[var(--dark-section-bg)] rounded-xl p-5 h-[calc(100vh-12rem)] shadow-xl">
             <LatexEditor
-  latexCode={latexCode}
-  setLatexCode={setLatexCode}
-  highlightedBlockId={highlightedBlockId}
-/>            </div>
+      latexCode={latexCode}
+      setLatexCode={setLatexCode}
+      highlightedBlockId={highlightedBlockId}
+      highlightedText={highlightedText}
+    />    </div>
           </motion.section>
 
           <motion.section 
