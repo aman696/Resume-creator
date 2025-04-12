@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import mistral, templates, compiler, pdf_extractor, auth
+from routers import mistral, templates, compiler, pdf_extractor, auth , parser
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel, OAuthFlowAuthorizationCode
 from fastapi.openapi.models import SecurityScheme
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8081"],
+    allow_origins=["http://localhost:8080"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -15,6 +15,7 @@ app.add_middleware(
 
 # ✅ Register router with prefix="/auth"
 app.include_router(auth.router, prefix="/auth")
+app.include_router(parser.router)
 app.include_router(mistral.router)
 app.include_router(templates.router)
 app.include_router(compiler.router)

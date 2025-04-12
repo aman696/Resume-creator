@@ -1,69 +1,29 @@
-import React, { useEffect, useRef, useState } from "react";
+// LatexEditor.tsx
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { EditorState } from "@codemirror/state";
-import { EditorView, basicSetup } from "codemirror";
+import axios from "axios";
 
 interface LatexEditorProps {
   latexCode: string;
   setLatexCode: (code: string) => void;
+  highlightedBlockId?: string | null;
 }
 
-function buildDisplayLines(originalText: string) {
-  const originalLines = originalText.split("\n");
-  const displayLines = [...originalLines];
-  const lineMap = originalLines.map((_, idx) => idx);
-  return { displayLines, lineMap };
-}
-
-function reconstructOriginalText(
-  displayLines: string[],
-  lineMap: number[],
-  originalText: string
-): string {
-  const originalLines = originalText.split("\n");
-  const updated = [...originalLines];
-  displayLines.forEach((dispLine, idx) => {
-    const origIndex = lineMap[idx];
-    if (origIndex != null) {
-      updated[origIndex] = dispLine;
-    }
-  });
-  return updated.join("\n");
-}
-
-function findRemoval(oldStr: string, newStr: string): string | null {
-  if (newStr.length >= oldStr.length) return null;
-  let start = 0;
-  const minLen = Math.min(oldStr.length, newStr.length);
-  while (start < minLen && oldStr[start] === newStr[start]) start++;
-  if (start === newStr.length && newStr.length < oldStr.length) {
-    return oldStr.slice(start);
-  }
-  let endOld = oldStr.length - 1;
-  let endNew = newStr.length - 1;
-  while (endOld >= 0 && endNew >= 0 && oldStr[endOld] === newStr[endNew]) {
-    endOld--;
-    endNew--;
-  }
-  if (endOld >= start) return oldStr.slice(start, endOld + 1);
-  return null;
-}
 function validateLatexMarkers(code: string) {
   const beginMarkers = (code.match(/% BEGIN_\w+/g) || []);
   const endMarkers: string[] = (code.match(/% END_\w+/g) || []);
-
   const errors: string[] = [];
-  
+
   if (beginMarkers.length !== endMarkers.length) {
     errors.push("Unbalanced markers: Number of BEGIN and END markers do not match.");
   }
 
   const unmatchedBegins = beginMarkers.filter(
-    begin => !endMarkers.includes(begin.replace('BEGIN', 'END'))
+    begin => !endMarkers.includes(begin.replace("BEGIN", "END"))
   );
 
   if (unmatchedBegins.length > 0) {
-    errors.push(`Unmatched BEGIN markers: ${unmatchedBegins.join(', ')}`);
+    errors.push(`Unmatched BEGIN markers: ${unmatchedBegins.join(", ")}`);
   }
 
   return {
@@ -72,180 +32,111 @@ function validateLatexMarkers(code: string) {
   };
 }
 
-// Enhance findMarkerBlockForLine to provide more context
-function findMarkerBlockForLine(originalLines: string[], lineIndex: number): { 
-  blockId: string | null, 
-  blockStart: number, 
-  blockEnd: number,
-  isMarkerLine: boolean 
-} {
-  const blocks: Array<{
-    id: string, 
-    start: number, 
-    end: number
-  }> = [];
-
-  originalLines.forEach((line, idx) => {
-    const beginMatch = line.match(/^% BEGIN_(\w+)/);
-    const endMatch = line.match(/^% END_(\w+)/);
-    
-    if (beginMatch) {
-      blocks.push({ 
-        id: beginMatch[1], 
-        start: idx, 
-        end: -1 
-      });
-    } else if (endMatch) {
-      const blk = blocks.find(b => b.id === endMatch[1] && b.end === -1);
-      if (blk) {
-        blk.end = idx;
-      }
-    }
-  });
-
-  blocks.forEach(b => {
-    if (b.end === -1) b.end = originalLines.length - 1;
-  });
-
-  for (const b of blocks) {
-    if (b.start <= lineIndex && lineIndex <= b.end) {
-      return {
-        blockId: b.id,
-        blockStart: b.start,
-        blockEnd: b.end,
-        isMarkerLine: lineIndex === b.start || lineIndex === b.end
-      };
-    }
-  }
-
-  return { 
-    blockId: null, 
-    blockStart: -1, 
-    blockEnd: -1,
-    isMarkerLine: false
-  };
+function getWordAt(text: string, position: number) {
+  const left = text.slice(0, position).match(/[\w\\-]+$/);
+  const right = text.slice(position).match(/^[\w\\-]+/);
+  return (left ? left[0] : "") + (right ? right[0] : "");
 }
 
-const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
-  const [editorError, setEditorError] = useState<string | null>(null);
+function getLineNumber(text: string, position: number) {
+  return text.substring(0, position).split("\n").length - 1;
+}
+
+function findAstNodeByLine(ast: any[], targetLine: number, currentLine = { val: 0 }): any | null {
+  for (const node of ast) {
+    const localLine = { ...currentLine };
+
+    if (node.type === "text" || node.type === "command") {
+      if (localLine.val === targetLine) return node;
+      localLine.val++;
+    }
+
+    if (node.type === "environment" && Array.isArray(node.children)) {
+      const found = findAstNodeByLine(node.children, targetLine, localLine);
+      if (found) return found;
+    }
+
+    currentLine.val = localLine.val;
+  }
+
+  return null;
+}
+
+const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode, highlightedBlockId }) => {
   const [markerWarnings, setMarkerWarnings] = useState<string[]>([]);
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const [latexAST, setLatexAST] = useState<any[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (latexCode.trim()) {
+      axios.post("http://localhost:8000/parse-latex", { code: latexCode })
+        .then(res => setLatexAST(res.data.ast))
+        .catch(err => console.error("AST Fetch Failed", err));
+    }
+  }, [latexCode]);
+
+  useEffect(() => {
+    if (!highlightedBlockId) return;
+
+    const lines = latexCode.split("\n");
+    const start = lines.findIndex(line => line.trim() === `% BEGIN_${highlightedBlockId}`);
+    const end = lines.findIndex(line => line.trim() === `% END_${highlightedBlockId}`);
+
+    if (start !== -1 && end !== -1 && textareaRef.current) {
+      const textBefore = lines.slice(0, start).join("\n");
+      const selectionStart = textBefore.length + (start > 0 ? 1 : 0);
+      const selectionEnd = selectionStart + lines.slice(start, end + 1).join("\n").length;
+
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
+    }
+  }, [highlightedBlockId, latexCode]);
 
   const handleClear = () => {
-    if (viewRef.current) {
-      const transaction = viewRef.current.state.update({
-        changes: { from: 0, to: viewRef.current.state.doc.length, insert: '' }
-      });
-      viewRef.current.dispatch(transaction);
-      setLatexCode('');
-      setEditorError(null);
-    }
+    setLatexCode('');
+    setMarkerWarnings([]);
+    setEditorError(null);
   };
-  // Clear editor function
 
-  const handleLatexCodeChange = (newCode: string) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newCode = e.target.value;
     const validation = validateLatexMarkers(newCode);
-    
     if (!validation.isValid) {
       setMarkerWarnings(validation.errors);
     } else {
       setMarkerWarnings([]);
     }
-
     setLatexCode(newCode);
   };
-  useEffect(() => {
-    if (!editorRef.current) return;
 
+  const handleClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     try {
-      const { displayLines, lineMap } = buildDisplayLines(latexCode);
-      const oldText = displayLines.join("\n");
+      const textarea = e.currentTarget;
+      const text = textarea.value;
+      const pos = textarea.selectionStart;
+      const line = getLineNumber(text, pos);
+      const word = getWordAt(text, pos);
 
-      const state = EditorState.create({
-        doc: oldText,
-        extensions: [
-          basicSetup,
-          EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
-              const newText = update.state.doc.toString();
-              const removed = findRemoval(oldText, newText);
-              
-              // Validate markers on each change
-              const validation = validateLatexMarkers(newText);
-              if (!validation.isValid) {
-                setMarkerWarnings(validation.errors);
-              } else {
-                setMarkerWarnings([]);
-              }
+      console.log("Clicked word:", word);
+      console.log("Line number:", line);
 
-              if (removed) {
-                console.log(`removed "${removed}"`);
-              }
-
-              const newLines = newText.split("\n");
-              const newOriginal = reconstructOriginalText(newLines, lineMap, latexCode);
-              handleLatexCodeChange(newOriginal);
-            }
-          }),
-        ],
-      });
-      const view = new EditorView({
-        state,
-        parent: editorRef.current,
-      });
-
-      viewRef.current = view;
-
-      return () => {
-        view.destroy();
-      };
+      const matchNode = findAstNodeByLine(latexAST, line);
+      console.log("Matched AST Node:", matchNode);
     } catch (error) {
-      setEditorError('Failed to initialize editor');
-      console.error(error);
-    }
-  }, [latexCode]);
-
-  const handleClick = () => {
-    if (!viewRef.current) return;
-
-    try {
-      const pos = viewRef.current.state.selection.main.head;
-      const text = viewRef.current.state.doc.toString();
-      const lines = text.split("\n");
-      let line = 0,
-        charCount = 0;
-      while (line < lines.length && charCount + lines[line].length < pos) {
-        charCount += lines[line].length + 1;
-        line++;
-      }
-
-      const originalLines = latexCode.split("\n");
-      const { blockId, blockStart, blockEnd, isMarkerLine } = findMarkerBlockForLine(originalLines, line);
-      
-      if (blockId) {
-        console.log(`Inside block: ${blockId}`);
-        
-        if (isMarkerLine) {
-          alert('⚠️ You are on a marker line. Modifying markers can break template synchronization.');
-        }
-      } else {
-        console.log("No marker block found for that line.");
-      }
-    } catch (error) {
-      setEditorError('Error processing line');
+      setEditorError('Click detection failed');
       console.error(error);
     }
   };
 
   return (
-    <motion.div 
-      className="container mx-auto px-4 py-6 max-w-4xl" 
+    <motion.div
+      className="container mx-auto px-4 py-6 max-w-4xl"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-            {markerWarnings.length > 0 && (
+      {markerWarnings.length > 0 && (
         <div className="mb-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
           <p className="font-bold">Marker Validation Warnings:</p>
           <ul className="list-disc list-inside">
@@ -255,6 +146,7 @@ const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode }) =>
           </ul>
         </div>
       )}
+
       <div className="flex items-center justify-between mb-4 border-b pb-2 border-[var(--primary-dark)]">
         <h2 className="text-2xl font-bold text-[var(--primary)] flex items-center">
           <svg
@@ -275,42 +167,21 @@ const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode }) =>
         </h2>
       </div>
 
-      <div className="relative flex-1 group">
-        <div 
-          ref={editorRef}
-          onClick={handleClick}
-          className="relative h-full 
-            max-h-[600px] 
-            min-h-[400px] 
-            sm:min-h-[450px] 
-            md:min-h-[500px] 
-            lg:min-h-[550px] 
-            w-full 
-            rounded-lg 
-            bg-[var(--dark-card-bg)] 
-            border border-[var(--primary-dark)] 
-            shadow-lg 
-            p-4 
-            text-sm md:text-base 
-            font-mono 
-            overflow-auto 
-            focus:outline-none 
-            focus:ring-2 
-            focus:ring-[var(--primary)] 
-            transition-all 
-            duration-300"
-        />
-      </div>
+      <textarea
+        ref={textareaRef}
+        value={latexCode}
+        onChange={handleChange}
+        onClick={handleClick}
+        className="w-full h-[500px] p-4 border border-[var(--primary-dark)] rounded-lg bg-[var(--dark-card-bg)] text-sm md:text-base font-mono shadow focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all duration-300"
+      />
 
       {editorError && (
-        <div className="mt-2 text-red-500 text-sm">
-          {editorError}
-        </div>
+        <div className="mt-2 text-red-500 text-sm">{editorError}</div>
       )}
 
       <div className="mt-2 flex justify-between items-center text-xs text-[var(--dark-text-muted)]">
         <span>{latexCode.length} characters</span>
-        <button 
+        <button
           className="text-[var(--primary)] hover:text-[var(--secondary)] transition"
           onClick={handleClear}
         >
@@ -321,4 +192,4 @@ const LatexEditor: React.FC<LatexEditorProps> = ({ latexCode, setLatexCode }) =>
   );
 };
 
-export default LatexEditor; 
+export default LatexEditor;

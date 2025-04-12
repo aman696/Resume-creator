@@ -7,12 +7,21 @@ import LatexEditor from '@/components/templates/LatexEditor';
 import PdfPreviewCompiler from '@/components/templates/PdfPreviewCompiler';
 import { applyHtmlEditsToLatex } from '@/components/templates/syncUtils';
 const TemplateEditing = () => {
+  const [highlightedBlockId, setHighlightedBlockId] = useState<string | null>(null);
   const { state } = useLocation();
   const initialLatex = state?.latex || '';
   const [latexCode, setLatexCode] = useState(initialLatex);
   const [isMobilePanelEditor, setIsMobilePanelEditor] = useState(true);
   const templateId = state?.templateId;
-
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setHighlightedBlockId(customEvent.detail);
+    };
+  
+    window.addEventListener("latex-block-click", handler);
+    return () => window.removeEventListener("latex-block-click", handler);
+  }, []);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -110,8 +119,11 @@ const TemplateEditing = () => {
             variants={itemVariants}
           >
             <div className="bg-[var(--dark-section-bg)] rounded-xl p-5 h-[calc(100vh-12rem)] shadow-xl">
-              <LatexEditor latexCode={latexCode} setLatexCode={setLatexCode} />
-            </div>
+            <LatexEditor
+  latexCode={latexCode}
+  setLatexCode={setLatexCode}
+  highlightedBlockId={highlightedBlockId}
+/>            </div>
           </motion.section>
 
           <motion.section 

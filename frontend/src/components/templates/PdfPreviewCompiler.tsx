@@ -154,11 +154,12 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ latexCode, templateId
 
   // Handler that logs the data-latex-id
   const onDataIdClick = (ev: Event) => {
-    ev.stopPropagation(); // prevent deeper event handling
+    ev.stopPropagation();
     const target = ev.currentTarget as HTMLElement;
     const dataId = target.getAttribute("data-latex-id");
     if (dataId) {
       console.log("Clicked data-latex-id:", dataId);
+      window.dispatchEvent(new CustomEvent("latex-block-click", { detail: dataId }));
     }
   };
 
